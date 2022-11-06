@@ -40,9 +40,6 @@ int main(int argc, char* argv[])
     namedWindow(window_detection_name);
     createTrackbar("H", window_detection_name, &H_val, max_value_H, on_H_val_thresh_trackbar);
 
-
-    while (true) {
-
 	//changing Hue value
 
 	Mat hsv = HSVImage.clone();
@@ -51,17 +48,17 @@ int main(int argc, char* argv[])
 	Mat& H = hsv_vec[0];
 	Mat& S = hsv_vec[1];
 	Mat& V = hsv_vec[2];
-	//S = 0;
-	//hsv = (V > 10); // non-zero pixels in the original image
+	Mat finalImage;
+
+
+    while (true) {
+
 	H = H_val; // H is between 0-180 in OpenCV
 	merge(hsv_vec, hsv);
 	HSVImage = hsv; // according to your code
 
 
-
-
 	//showing HSV image Notice: imshow always renders in BGR space
-	Mat finalImage;
 	cvtColor(HSVImage, finalImage, cv::COLOR_HSV2BGR);
 	imshow(window_detection_name, finalImage);
 
@@ -71,8 +68,6 @@ int main(int argc, char* argv[])
         break;
     }
     } 
-
-    
 
 	return 0;
 }
