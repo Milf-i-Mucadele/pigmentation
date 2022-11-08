@@ -1,7 +1,7 @@
-Executable : /Users/muhammedalmaz/Library/Android/sdk/cmake/3.10.2.4988404/bin/ninja
+Executable : C:\Users\sbura\AppData\Local\Android\sdk\cmake\3.10.2.4988404\bin\ninja.exe
 arguments : 
 -C
-/Users/muhammedalmaz/workspace/open_cv_example/android/app/.cxx/cmake/debug/x86_64
+C:\Users\sbura\development\flutter_projects\flutter_ffi_opencv_example\android\app\.cxx\cmake\debug\x86_64
 my_functions
 jvmArgs : 
 

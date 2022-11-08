@@ -35,13 +35,16 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     print("OpenCV Version: ${getOpenCVVersion()}");
-    Permission.manageExternalStorage.request().then((value) => print("manageExternalStorage: ${value}"));
+    Permission.manageExternalStorage
+        .request()
+        .then((value) => print("manageExternalStorage: ${value}"));
     Permission.storage.request().then((value) => print("storage: ${value}"));
     super.initState();
   }
 
   void _onSelectImageClick() async {
-    final image = await ImagePicker().pickImage(source: ImageSource.gallery, imageQuality: 100);
+    final image = await ImagePicker()
+        .pickImage(source: ImageSource.gallery, imageQuality: 100);
     if (image == null) return;
     setState(() => this.imagePath = image.path);
   }
@@ -49,7 +52,8 @@ class _MyHomePageState extends State<MyHomePage> {
   void _onConvertClick() async {
     if (imagePath != null) {
       List<String> outputPath = imagePath!.split(".");
-      outputPath[outputPath.length - 2] = "${outputPath[outputPath.length - 2]}_gray";
+      outputPath[outputPath.length - 2] =
+          "${outputPath[outputPath.length - 2]}_gray";
       print(outputPath.join("."));
       Stopwatch stopwatch = new Stopwatch()..start();
       convertImageToGrayImage(imagePath!, outputPath.join("."));
@@ -68,8 +72,13 @@ class _MyHomePageState extends State<MyHomePage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Expanded(child: imagePath != null ? Image.file(File(imagePath!), gaplessPlayback: true) : Container()),
-          Text(processMillisecond > 0 ? "Process Millisecond: ${processMillisecond}" : "-"),
+          Expanded(
+              child: imagePath != null
+                  ? Image.file(File(imagePath!), gaplessPlayback: true)
+                  : Container()),
+          Text(processMillisecond > 0
+              ? "Process Millisecond: ${processMillisecond}"
+              : "-"),
           MaterialButton(
             color: Colors.white,
             onPressed: _onSelectImageClick,
@@ -78,7 +87,8 @@ class _MyHomePageState extends State<MyHomePage> {
           MaterialButton(
             color: Colors.black,
             onPressed: _onConvertClick,
-            child: Text("Convert Gray Image", style: TextStyle(color: Colors.white)),
+            child: Text("Convert Gray Image",
+                style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
