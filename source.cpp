@@ -74,14 +74,14 @@ int main(int argc, char* argv[])
 	Mat hsv;
 	Mat HLSImage;
 	Mat img, img_temp;
-	vector<Mat> hsv_vec;
+	vector<Mat> hsv_vec, hsv_vec_temp;
 	Mat finalImage;
 
 	img_temp = imread("couch.jpg");
-	split(img_temp, hsv_vec); //this is an opencv function
-	Mat& H = hsv_vec[0];
-	Mat& L = hsv_vec[0];
-	Mat& S = hsv_vec[0];
+	split(img_temp, hsv_vec_temp); //this is an opencv function
+	Mat& H = hsv_vec_temp[0];
+	Mat& L = hsv_vec_temp[1];
+	Mat& S = hsv_vec_temp[2];
 
 	namedWindow(window_detection_name);
 	namedWindow(trackbar_window);
@@ -93,41 +93,41 @@ int main(int argc, char* argv[])
 	while (true) {
 
 	if (index_val != old_index){
-	//Reading the image in the source files part 
-	img = imread("images/"+files[index_val]);
-	//imshow("original image", img);
+		//Reading the image in the source files part 
+		img = imread("images/"+files[index_val]);
+		//imshow("original image", img);
 
-	//If the image is empty, error pops up
-	if (img.empty())
-	{
-		std::cout << "Could not read the image: ";
-		return 1;
-	}
+		//If the image is empty, error pops up
+		if (img.empty())
+		{
+			std::cout << "Could not read the image: ";
+			return 1;
+		}
 
 
-	//BGR -> HSV changing part
-	cvtColor(img, HLSImage, cv::COLOR_BGR2HLS);
+		//BGR -> HSV changing part
+		cvtColor(img, HLSImage, cv::COLOR_BGR2HLS);
 
-	//changing Hue value
-	//cloning in resultHSV
-	hsv = HLSImage.clone();
-	split(hsv, hsv_vec); //this is an opencv function
-	H = hsv_vec[0];
-	L = hsv_vec[1];
-	S = hsv_vec[2];
-	//Mat S_temp = (S < 15);
-	//L = L + L*0.5; //todo: this part is essential for better pigmentation
-	//S_temp = 230;
+		//changing Hue value
+		//cloning in resultHSV
+		hsv = HLSImage.clone();
+		split(hsv, hsv_vec); //this is an opencv function
+		H = hsv_vec[0];
+		L = hsv_vec[1];
+		S = hsv_vec[2];
+		//Mat S_temp = (S < 15);
+		//L = L + L*0.5; //todo: this part is essential for better pigmentation
+		//S_temp = 230;
 
-	//S = S + (255-S)*0.8;
-	//S = 240;
+		//S = S + (255-S)*0.8;
+		//S = 240;
 
-	cout <<  "Sum of L ____________ " << sum(L)[0] << endl;
-	cout << "Size of L ____________ " << L.size[0] * L.size[0] << endl;
+		cout <<  "Sum of L ____________ " << sum(L)[0] << endl;
+		cout << "Size of L ____________ " << L.size[0] * L.size[0] << endl;
 
-	cout << ((cv::sum(L)[0] * 100) / (L.size[0] * L.size[0] * 255));
+		cout << ((cv::sum(L)[0] * 100) / (L.size[0] * L.size[0] * 255));
 
-	old_index = index_val;
+		old_index = index_val;
 	}
 
 		H = H_val; // H is between 0-180 in OpenCV
