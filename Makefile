@@ -124,6 +124,19 @@ deneme/fast:
 .PHONY : deneme/fast
 
 #=============================================================================
+# Target rules for targets named deneme2
+
+# Build rule for target.
+deneme2: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 deneme2
+.PHONY : deneme2
+
+# fast build rule for target.
+deneme2/fast:
+	$(MAKE) -f CMakeFiles/deneme2.dir/build.make CMakeFiles/deneme2.dir/build
+.PHONY : deneme2/fast
+
+#=============================================================================
 # Target rules for targets named DisplayImage
 
 # Build rule for target.
@@ -163,6 +176,33 @@ deneme.cpp.s:
 	$(MAKE) -f CMakeFiles/deneme.dir/build.make CMakeFiles/deneme.dir/deneme.cpp.s
 .PHONY : deneme.cpp.s
 
+deneme2.o: deneme2.cpp.o
+
+.PHONY : deneme2.o
+
+# target to build an object file
+deneme2.cpp.o:
+	$(MAKE) -f CMakeFiles/deneme2.dir/build.make CMakeFiles/deneme2.dir/deneme2.cpp.o
+.PHONY : deneme2.cpp.o
+
+deneme2.i: deneme2.cpp.i
+
+.PHONY : deneme2.i
+
+# target to preprocess a source file
+deneme2.cpp.i:
+	$(MAKE) -f CMakeFiles/deneme2.dir/build.make CMakeFiles/deneme2.dir/deneme2.cpp.i
+.PHONY : deneme2.cpp.i
+
+deneme2.s: deneme2.cpp.s
+
+.PHONY : deneme2.s
+
+# target to generate assembly for a file
+deneme2.cpp.s:
+	$(MAKE) -f CMakeFiles/deneme2.dir/build.make CMakeFiles/deneme2.dir/deneme2.cpp.s
+.PHONY : deneme2.cpp.s
+
 source.o: source.cpp.o
 
 .PHONY : source.o
@@ -199,10 +239,14 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... deneme"
+	@echo "... deneme2"
 	@echo "... DisplayImage"
 	@echo "... deneme.o"
 	@echo "... deneme.i"
 	@echo "... deneme.s"
+	@echo "... deneme2.o"
+	@echo "... deneme2.i"
+	@echo "... deneme2.s"
 	@echo "... source.o"
 	@echo "... source.i"
 	@echo "... source.s"
