@@ -1,3 +1,7 @@
 {
-  "cmake.sourceDirectory": "${workspaceFolder}/android/app"
+  "cmake.sourceDirectory": "${workspaceFolder}/android/app",
+  "files.associations": {
+    "chrono": "cpp",
+    "xlocale": "cpp"
+  }
 }

@@ -1,5 +1,6 @@
 #include <opencv2/opencv.hpp>
 #include <chrono>
+#include "slic.h"
 
 #ifdef __ANDROID__
 
@@ -38,6 +39,7 @@ extern "C"
         cv::Mat img = cv::imread(inputImagePath);
         platform_log("Length: %d", img.rows);
 
+        /*
         // BGR -> HSV changing part
         cv::Mat HSVImage;
         cvtColor(img, HSVImage, cv::COLOR_BGR2HSV);
@@ -55,12 +57,22 @@ extern "C"
         H = 23; // H is between 0-180 in OpenCV
         merge(hsv_vec, hsv);
         HSVImage = hsv; // according to your code
+        */
+	    SLIC slic;
+        cv::Mat result;
+    	int numSuperpixel = 100;
+    	slic.GenerateSuperpixels(img, numSuperpixel);
 
+        if (img.channels() == 3) 
+            result = slic.GetImgWithContours(cv::Scalar(0, 0, 255));
+        else
+            result = slic.GetImgWithContours(cv::Scalar(128));
+        
         // showing HSV image Notice: imshow always renders in BGR space
         cv::Mat finalImage;
-        cvtColor(HSVImage, finalImage, cv::COLOR_HSV2BGR);
+        //cvtColor(HSVImage, finalImage, cv::COLOR_HSV2BGR);
         platform_log("Output Path: %s", outputPath);
-        imwrite(outputPath, finalImage);
+        imwrite(outputPath, result);
         platform_log("Image writed again ");
     }
 }

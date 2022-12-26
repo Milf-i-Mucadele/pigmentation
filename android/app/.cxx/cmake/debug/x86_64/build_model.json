@@ -5,9 +5,9 @@
     "environmentVariables": []
   },
   "cmake": {
-    "cmakeArtifactsBaseFolder": "C:\\Users\\sbura\\development\\flutter_projects\\flutter_ffi_opencv_example\\android\\app\\.cxx\\cmake\\debug\\x86_64",
-    "cmakeServerLogFile": "C:\\Users\\sbura\\development\\flutter_projects\\flutter_ffi_opencv_example\\android\\app\\.cxx\\cmake\\debug\\x86_64\\cmake_server_log.txt",
-    "cmakeWrappingBaseFolder": "C:\\Users\\sbura\\development\\flutter_projects\\flutter_ffi_opencv_example\\android\\app\\.cxx\\cxx\\debug\\x86_64",
+    "cmakeArtifactsBaseFolder": "C:\\pigmentation\\android\\app\\.cxx\\cmake\\debug\\x86_64",
+    "cmakeServerLogFile": "C:\\pigmentation\\android\\app\\.cxx\\cmake\\debug\\x86_64\\cmake_server_log.txt",
+    "cmakeWrappingBaseFolder": "C:\\pigmentation\\android\\app\\.cxx\\cxx\\debug\\x86_64",
     "effectiveConfiguration": {
       "name": "traditional-android-studio-cmake-environment",
       "description": "Composite reified CMakeSettings configuration",
@@ -15,9 +15,9 @@
       "inheritEnvironments": [
         "ndk"
       ],
-      "buildRoot": "C:\\Users\\sbura\\development\\flutter_projects\\flutter_ffi_opencv_example\\android\\app\\.cxx\\cmake\\debug\\x86_64",
-      "cmakeToolchain": "C:\\Users\\sbura\\AppData\\Local\\Android\\sdk\\ndk\\23.0.7599858\\build\\cmake\\android.toolchain.cmake",
-      "cmakeExecutable": "C:\\Users\\sbura\\AppData\\Local\\Android\\sdk\\cmake\\3.10.2.4988404\\bin\\cmake.exe",
+      "buildRoot": "C:\\pigmentation\\android\\app\\.cxx\\cmake\\debug\\x86_64",
+      "cmakeToolchain": "C:\\Users\\Onat\\AppData\\Local\\Android\\Sdk\\ndk\\23.0.7599858\\build\\cmake\\android.toolchain.cmake",
+      "cmakeExecutable": "C:\\Users\\Onat\\AppData\\Local\\Android\\Sdk\\cmake\\3.10.2.4988404\\bin\\cmake.exe",
       "variables": [
         {
           "name": "CMAKE_CXX_FLAGS",
@@ -25,7 +25,7 @@
         },
         {
           "name": "CMAKE_FIND_ROOT_PATH",
-          "value": "C:\\Users\\sbura\\development\\flutter_projects\\flutter_ffi_opencv_example\\android\\app\\.cxx\\cmake\\debug\\prefab\\x86_64\\prefab"
+          "value": "C:\\pigmentation\\android\\app\\.cxx\\cmake\\debug\\prefab\\x86_64\\prefab"
         },
         {
           "name": "CMAKE_BUILD_TYPE",
@@ -33,7 +33,7 @@
         },
         {
           "name": "CMAKE_TOOLCHAIN_FILE",
-          "value": "C:\\Users\\sbura\\AppData\\Local\\Android\\sdk\\ndk\\23.0.7599858\\build\\cmake\\android.toolchain.cmake"
+          "value": "C:\\Users\\Onat\\AppData\\Local\\Android\\Sdk\\ndk\\23.0.7599858\\build\\cmake\\android.toolchain.cmake"
         },
         {
           "name": "ANDROID_ABI",
@@ -41,7 +41,7 @@
         },
         {
           "name": "ANDROID_NDK",
-          "value": "C:\\Users\\sbura\\AppData\\Local\\Android\\sdk\\ndk\\23.0.7599858"
+          "value": "C:\\Users\\Onat\\AppData\\Local\\Android\\Sdk\\ndk\\23.0.7599858"
         },
         {
           "name": "ANDROID_PLATFORM",
@@ -53,7 +53,7 @@
         },
         {
           "name": "CMAKE_ANDROID_NDK",
-          "value": "C:\\Users\\sbura\\AppData\\Local\\Android\\sdk\\ndk\\23.0.7599858"
+          "value": "C:\\Users\\Onat\\AppData\\Local\\Android\\Sdk\\ndk\\23.0.7599858"
         },
         {
           "name": "CMAKE_EXPORT_COMPILE_COMMANDS",
@@ -61,11 +61,11 @@
         },
         {
           "name": "CMAKE_LIBRARY_OUTPUT_DIRECTORY",
-          "value": "C:\\Users\\sbura\\development\\flutter_projects\\flutter_ffi_opencv_example\\build\\app\\intermediates\\cmake\\debug\\obj\\x86_64"
+          "value": "C:\\pigmentation\\build\\app\\intermediates\\cmake\\debug\\obj\\x86_64"
         },
         {
           "name": "CMAKE_MAKE_PROGRAM",
-          "value": "C:\\Users\\sbura\\AppData\\Local\\Android\\sdk\\cmake\\3.10.2.4988404\\bin\\ninja.exe"
+          "value": "C:\\Users\\Onat\\AppData\\Local\\Android\\Sdk\\cmake\\3.10.2.4988404\\bin\\ninja.exe"
         },
         {
           "name": "CMAKE_SYSTEM_NAME",
@@ -82,14 +82,14 @@
       ]
     }
   },
-  "cxxBuildFolder": "C:\\Users\\sbura\\development\\flutter_projects\\flutter_ffi_opencv_example\\android\\app\\.cxx\\cmake\\debug\\x86_64",
+  "cxxBuildFolder": "C:\\pigmentation\\android\\app\\.cxx\\cmake\\debug\\x86_64",
   "info": {
     "abi": "X86_64",
     "bitness": 64,
     "deprecated": false,
     "default": true
   },
-  "originalCxxBuildFolder": "C:\\Users\\sbura\\development\\flutter_projects\\flutter_ffi_opencv_example\\android\\app\\.cxx\\cmake\\debug\\x86_64",
+  "originalCxxBuildFolder": "C:\\pigmentation\\android\\app\\.cxx\\cmake\\debug\\x86_64",
   "variant": {
     "buildSystemArgumentList": [
       "-DANDROID_STL\u003dc++_shared"
@@ -105,24 +105,24 @@
     "module": {
       "buildSystem": "CMAKE",
       "cmake": {
-        "cmakeExe": "C:\\Users\\sbura\\AppData\\Local\\Android\\sdk\\cmake\\3.10.2.4988404\\bin\\cmake.exe",
+        "cmakeExe": "C:\\Users\\Onat\\AppData\\Local\\Android\\Sdk\\cmake\\3.10.2.4988404\\bin\\cmake.exe",
         "minimumCmakeVersion": "3.10.2",
-        "ninjaExe": "C:\\Users\\sbura\\AppData\\Local\\Android\\sdk\\cmake\\3.10.2.4988404\\bin\\ninja.exe"
+        "ninjaExe": "C:\\Users\\Onat\\AppData\\Local\\Android\\Sdk\\cmake\\3.10.2.4988404\\bin\\ninja.exe"
       },
-      "cmakeToolchainFile": "C:\\Users\\sbura\\AppData\\Local\\Android\\sdk\\ndk\\23.0.7599858\\build\\cmake\\android.toolchain.cmake",
-      "cxxFolder": "C:\\Users\\sbura\\development\\flutter_projects\\flutter_ffi_opencv_example\\android\\app\\.cxx",
+      "cmakeToolchainFile": "C:\\Users\\Onat\\AppData\\Local\\Android\\Sdk\\ndk\\23.0.7599858\\build\\cmake\\android.toolchain.cmake",
+      "cxxFolder": "C:\\pigmentation\\android\\app\\.cxx",
       "gradleModulePathName": ":app",
-      "intermediatesFolder": "C:\\Users\\sbura\\development\\flutter_projects\\flutter_ffi_opencv_example\\build\\app\\intermediates",
-      "makeFile": "C:\\Users\\sbura\\development\\flutter_projects\\flutter_ffi_opencv_example\\android\\app\\CMakeLists.txt",
-      "moduleBuildFile": "C:\\Users\\sbura\\development\\flutter_projects\\flutter_ffi_opencv_example\\android\\app\\build.gradle",
-      "moduleRootFolder": "C:\\Users\\sbura\\development\\flutter_projects\\flutter_ffi_opencv_example\\android\\app",
+      "intermediatesFolder": "C:\\pigmentation\\build\\app\\intermediates",
+      "makeFile": "C:\\pigmentation\\android\\app\\CMakeLists.txt",
+      "moduleBuildFile": "C:\\pigmentation\\android\\app\\build.gradle",
+      "moduleRootFolder": "C:\\pigmentation\\android\\app",
       "ndkDefaultAbiList": [
         "ARMEABI_V7A",
         "ARM64_V8A",
         "X86",
         "X86_64"
       ],
-      "ndkFolder": "C:\\Users\\sbura\\AppData\\Local\\Android\\sdk\\ndk\\23.0.7599858",
+      "ndkFolder": "C:\\Users\\Onat\\AppData\\Local\\Android\\Sdk\\ndk\\23.0.7599858",
       "ndkMetaAbiList": [
         {
           "abi": "ARMEABI_V7A",
@@ -181,29 +181,29 @@
       "ndkDefaultStl": "LIBCXX_STATIC",
       "ndkVersion": "23.0.7599858",
       "project": {
-        "compilerSettingsCacheFolder": "C:\\Users\\sbura\\development\\flutter_projects\\flutter_ffi_opencv_example\\android\\.cxx",
-        "cxxFolder": "C:\\Users\\sbura\\development\\flutter_projects\\flutter_ffi_opencv_example\\android\\.cxx",
+        "compilerSettingsCacheFolder": "C:\\pigmentation\\android\\.cxx",
+        "cxxFolder": "C:\\pigmentation\\android\\.cxx",
         "isBuildOnlyTargetAbiEnabled": true,
         "isCmakeBuildCohabitationEnabled": false,
         "isNativeCompilerSettingsCacheEnabled": false,
-        "rootBuildGradleFolder": "C:\\Users\\sbura\\development\\flutter_projects\\flutter_ffi_opencv_example\\android",
-        "sdkFolder": "C:\\Users\\sbura\\AppData\\Local\\Android\\sdk",
+        "rootBuildGradleFolder": "C:\\pigmentation\\android",
+        "sdkFolder": "C:\\Users\\Onat\\AppData\\Local\\Android\\Sdk",
         "isPrefabEnabled": false
       },
       "splitsAbiFilterSet": [],
       "stlSharedObjectMap": {
         "LIBCXX_SHARED": {
-          "ARMEABI_V7A": "C:\\Users\\sbura\\AppData\\Local\\Android\\sdk\\ndk\\23.0.7599858\\toolchains\\llvm\\prebuilt\\windows-x86_64\\sysroot\\usr\\lib\\arm-linux-androideabi\\libc++_shared.so",
-          "ARM64_V8A": "C:\\Users\\sbura\\AppData\\Local\\Android\\sdk\\ndk\\23.0.7599858\\toolchains\\llvm\\prebuilt\\windows-x86_64\\sysroot\\usr\\lib\\aarch64-linux-android\\libc++_shared.so",
-          "X86": "C:\\Users\\sbura\\AppData\\Local\\Android\\sdk\\ndk\\23.0.7599858\\toolchains\\llvm\\prebuilt\\windows-x86_64\\sysroot\\usr\\lib\\i686-linux-android\\libc++_shared.so",
-          "X86_64": "C:\\Users\\sbura\\AppData\\Local\\Android\\sdk\\ndk\\23.0.7599858\\toolchains\\llvm\\prebuilt\\windows-x86_64\\sysroot\\usr\\lib\\x86_64-linux-android\\libc++_shared.so"
+          "ARMEABI_V7A": "C:\\Users\\Onat\\AppData\\Local\\Android\\Sdk\\ndk\\23.0.7599858\\toolchains\\llvm\\prebuilt\\windows-x86_64\\sysroot\\usr\\lib\\arm-linux-androideabi\\libc++_shared.so",
+          "ARM64_V8A": "C:\\Users\\Onat\\AppData\\Local\\Android\\Sdk\\ndk\\23.0.7599858\\toolchains\\llvm\\prebuilt\\windows-x86_64\\sysroot\\usr\\lib\\aarch64-linux-android\\libc++_shared.so",
+          "X86": "C:\\Users\\Onat\\AppData\\Local\\Android\\Sdk\\ndk\\23.0.7599858\\toolchains\\llvm\\prebuilt\\windows-x86_64\\sysroot\\usr\\lib\\i686-linux-android\\libc++_shared.so",
+          "X86_64": "C:\\Users\\Onat\\AppData\\Local\\Android\\Sdk\\ndk\\23.0.7599858\\toolchains\\llvm\\prebuilt\\windows-x86_64\\sysroot\\usr\\lib\\x86_64-linux-android\\libc++_shared.so"
         },
         "LIBCXX_STATIC": {},
         "NONE": {},
         "SYSTEM": {}
       }
     },
-    "objFolder": "C:\\Users\\sbura\\development\\flutter_projects\\flutter_ffi_opencv_example\\build\\app\\intermediates\\cmake\\debug\\obj",
+    "objFolder": "C:\\pigmentation\\build\\app\\intermediates\\cmake\\debug\\obj",
     "variantName": "debug",
     "validAbiList": [
       "ARMEABI_V7A",
@@ -211,8 +211,8 @@
       "X86",
       "X86_64"
     ],
-    "prefabDirectory": "C:\\Users\\sbura\\development\\flutter_projects\\flutter_ffi_opencv_example\\android\\app\\.cxx\\cmake\\debug\\prefab",
+    "prefabDirectory": "C:\\pigmentation\\android\\app\\.cxx\\cmake\\debug\\prefab",
     "prefabPackageDirectoryList": []
   },
-  "prefabFolder": "C:\\Users\\sbura\\development\\flutter_projects\\flutter_ffi_opencv_example\\android\\app\\.cxx\\cmake\\debug\\prefab\\x86_64"
+  "prefabFolder": "C:\\pigmentation\\android\\app\\.cxx\\cmake\\debug\\prefab\\x86_64"
 }

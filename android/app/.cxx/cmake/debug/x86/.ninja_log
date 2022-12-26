@@ -1,5 +1,8 @@
 # ninja log v5
-1	1721	689592640	CMakeFiles/my_functions.dir/C_/Users/sbura/development/flutter_projects/flutter_ffi_opencv_example/open_cv/my_functions.cpp.o	77782b35acaf36b
-1724	1833	689592640	C:/Users/sbura/development/flutter_projects/flutter_ffi_opencv_example/build/app/intermediates/cmake/debug/obj/x86/libmy_functions.so	e3fae0d2d0813b23
-3	1754	689593069	CMakeFiles/my_functions.dir/C_/Users/sbura/development/flutter_projects/flutter_ffi_opencv_example/open_cv/my_functions.cpp.o	77782b35acaf36b
-1754	1867	689593069	C:/Users/sbura/development/flutter_projects/flutter_ffi_opencv_example/build/app/intermediates/cmake/debug/obj/x86/libmy_functions.so	e3fae0d2d0813b23
+3	1919	693622618	CMakeFiles/my_functions.dir/C_/pigmentation/open_cv/my_functions.cpp.o	2eaf8d7aa731b88b
+1	2253	693622618	CMakeFiles/my_functions.dir/C_/pigmentation/open_cv/slic.cpp.o	c3dd26a9e3142821
+2253	2361	693622619	C:/pigmentation/build/app/intermediates/cmake/debug/obj/x86/libmy_functions.so	a2555216c34d1fa6
+3	1847	693622994	CMakeFiles/my_functions.dir/C_/pigmentation/open_cv/my_functions.cpp.o	2eaf8d7aa731b88b
+1848	1961	693622994	C:/pigmentation/build/app/intermediates/cmake/debug/obj/x86/libmy_functions.so	a2555216c34d1fa6
+3	1742	693623646	CMakeFiles/my_functions.dir/C_/pigmentation/open_cv/my_functions.cpp.o	2eaf8d7aa731b88b
+1742	1853	693623646	C:/pigmentation/build/app/intermediates/cmake/debug/obj/x86/libmy_functions.so	a2555216c34d1fa6
