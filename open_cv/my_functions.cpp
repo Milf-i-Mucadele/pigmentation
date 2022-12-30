@@ -1,6 +1,7 @@
 #include <opencv2/opencv.hpp>
 #include <chrono>
 #include "slic.h"
+#include <opencv2/imgproc.hpp>
 
 #ifdef __ANDROID__
 
@@ -35,44 +36,55 @@ extern "C"
 
     __attribute__((visibility("default"))) __attribute__((used)) void convertImageToGrayImage(char *inputImagePath, char *outputPath)
     {
+        // inputimage path,color user wants, algortihm, reference points/tap point, output path
+
         platform_log("PATH %s: ", inputImagePath);
         cv::Mat img = cv::imread(inputImagePath);
         platform_log("Length: %d", img.rows);
 
-        /*
         // BGR -> HSV changing part
         cv::Mat HSVImage;
+        cv::Mat original = HSVImage.clone();
+        cv::Mat clone;
+        clone = HSVImage.clone();
         cvtColor(img, HSVImage, cv::COLOR_BGR2HSV);
 
         // changing Hue value
         cv::Mat hsv = HSVImage.clone();
+        // here
+        cv::Scalar minHSV = cv::Scalar(0, 130, 30);
+        cv::Scalar maxHSV = cv::Scalar(20, 255, 240);
+        cv::Mat maskHSV, resultHSV;
+        cv::inRange(hsv, minHSV, maxHSV, maskHSV);
+        // bitwise_not(maskHSV, maskHSV);
+        cv::bitwise_and(hsv, hsv, resultHSV, maskHSV);
+        cv::Mat segmented_img;
+        segmented_img = resultHSV.clone();
+
+        // PIGMENTATION
         vector<Mat> hsv_vec;
-        split(hsv, hsv_vec); // this is an opencv function
+        split(resultHSV, hsv_vec); // this is an opencv function
         cv::Mat &H = hsv_vec[0];
         cv::Mat &S = hsv_vec[1];
         cv::Mat &V = hsv_vec[2];
-        // S = 0;
-        // hsv = (V > 10); // non-zero pixels in the original image
+        // resultHSV = (V > 65); // non-zero pixels in the original image
+        H = 25; // H is between 0-180 in OpenCV
+        S = 255;
+        merge(hsv_vec, resultHSV);
+        HSVImage = resultHSV; // pigmented image
 
-        H = 23; // H is between 0-180 in OpenCV
-        merge(hsv_vec, hsv);
-        HSVImage = hsv; // according to your code
-        */
-	    SLIC slic;
-        cv::Mat result;
-    	int numSuperpixel = 100;
-    	slic.GenerateSuperpixels(img, numSuperpixel);
-
-        if (img.channels() == 3) 
-            result = slic.GetImgWithContours(cv::Scalar(0, 0, 255));
-        else
-            result = slic.GetImgWithContours(cv::Scalar(128));
-        
-        // showing HSV image Notice: imshow always renders in BGR space
+        // OVERLAY
+        cv::Mat base = cv::imread(inputImagePath);
+        subtract(base, segmented_img, base);
+        // cvtColor(base, base, cv::COLOR_BGR2HSV);
         cv::Mat finalImage;
-        //cvtColor(HSVImage, finalImage, cv::COLOR_HSV2BGR);
+        cvtColor(HSVImage, finalImage, cv::COLOR_HSV2BGR); // or rgb
+
+        add(finalImage, base, base);
+
+        // OUTPUTS
         platform_log("Output Path: %s", outputPath);
-        imwrite(outputPath, result);
+        imwrite(outputPath, base);
         platform_log("Image writed again ");
     }
 }

@@ -1,7 +1,7 @@
-Executable : C:\Users\Onat\AppData\Local\Android\Sdk\cmake\3.10.2.4988404\bin\ninja.exe
+Executable : C:\Users\sbura\AppData\Local\Android\sdk\cmake\3.10.2.4988404\bin\ninja.exe
 arguments : 
 -C
-C:\pigmentation\android\app\.cxx\cmake\debug\arm64-v8a
+C:\Users\sbura\development\platinpower_2\pigmentation\android\app\.cxx\cmake\debug\arm64-v8a
 my_functions
 jvmArgs : 
 

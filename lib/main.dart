@@ -37,8 +37,8 @@ class _MyHomePageState extends State<MyHomePage> {
     print("OpenCV Version: ${getOpenCVVersion()}");
     Permission.manageExternalStorage
         .request()
-        .then((value) => print("manageExternalStorage: ${value}"));
-    Permission.storage.request().then((value) => print("storage: ${value}"));
+        .then((value) => print("manageExternalStorage: $value"));
+    Permission.storage.request().then((value) => print("storage: $value"));
     super.initState();
   }
 
@@ -77,7 +77,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ? Image.file(File(imagePath!), gaplessPlayback: true)
                   : Container()),
           Text(processMillisecond > 0
-              ? "Process Millisecond: ${processMillisecond}"
+              ? "Process Millisecond: $processMillisecond"
               : "-"),
           MaterialButton(
             color: Colors.white,
