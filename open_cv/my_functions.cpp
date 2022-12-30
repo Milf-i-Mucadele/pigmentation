@@ -35,44 +35,82 @@ extern "C"
 
     __attribute__((visibility("default"))) __attribute__((used)) void convertImageToGrayImage(char *inputImagePath, char *outputPath)
     {
-        platform_log("PATH %s: ", inputImagePath);
+        //platform_log("PATH %s: ", inputImagePath);
         cv::Mat img = cv::imread(inputImagePath);
-        platform_log("Length: %d", img.rows);
+        //platform_log("Length: %d", img.rows);
+        //cvtColor(img, img, COLOR_BGR2RGB);
+        cv::Mat hsv, mask, res, result;
+
+        //medianBlur(img,blur, 5);
+        //bilateralFilter(blur2,blur3, 9, 75, 75);
+        cvtColor(img, hsv, COLOR_BGR2HSV);
+        GaussianBlur(hsv,hsv, Size(5, 5), 0);
+        /*
+        vector<Mat> hsv_vec;
+        split(hsv, hsv_vec); //this is an opencv function
+
+        cv::Mat& h = hsv_vec[0];
+        cv::Mat& s = hsv_vec[1];
+        cv::Mat& l = hsv_vec[2];
+        
+        //l.setTo(130, l > 30);
+        merge(hsv_vec, hsv); 
+        */
+        cv::Scalar minHSV = cv::Scalar(0, 130, 30);
+        cv::Scalar maxHSV = cv::Scalar(20, 255, 240); 
+
+        inRange(hsv, minHSV, maxHSV, mask);
+        bitwise_and(hsv, hsv, res, mask);
+        cvtColor(res, res, COLOR_HSV2BGR);
+
+        
+        vector<Mat> hsv_vec;
+        split(res, hsv_vec); //this is an opencv function
+
+        cv::Mat& h = hsv_vec[0];
+        cv::Mat& s = hsv_vec[1];
+        cv::Mat& v = hsv_vec[2];
+        h.setTo(100, v > 1);
+        merge(hsv_vec, res); 
+        
+
+        threshold(mask, mask, 0, 255, THRESH_BINARY_INV);
+        bitwise_and(img, img, result, mask);
+        img = result + res;
 
         /*
-        // BGR -> HSV changing part
-        cv::Mat HSVImage;
-        cvtColor(img, HSVImage, cv::COLOR_BGR2HSV);
-
-        // changing Hue value
-        cv::Mat hsv = HSVImage.clone();
-        vector<Mat> hsv_vec;
-        split(hsv, hsv_vec); // this is an opencv function
-        cv::Mat &H = hsv_vec[0];
-        cv::Mat &S = hsv_vec[1];
-        cv::Mat &V = hsv_vec[2];
-        // S = 0;
-        // hsv = (V > 10); // non-zero pixels in the original image
-
-        H = 23; // H is between 0-180 in OpenCV
-        merge(hsv_vec, hsv);
-        HSVImage = hsv; // according to your code
-        */
-	    SLIC slic;
-        cv::Mat result;
-    	int numSuperpixel = 100;
-    	slic.GenerateSuperpixels(img, numSuperpixel);
+        SLIC slic;
+    	int numSuperpixel = 5;
+    	slic.GenerateSuperpixels(res, numSuperpixel);
 
         if (img.channels() == 3) 
-            result = slic.GetImgWithContours(cv::Scalar(0, 0, 255));
+            result = slic.GetImgWithContours(cv::Scalar(10, 0, 255));
         else
             result = slic.GetImgWithContours(cv::Scalar(128));
+        //*/
+  
+        /*
+        cvtColor(res, res, COLOR_RGB2GRAY);
+        vector<vector<Point> > contours;
+        vector<Vec4i> hierarchy;
+        Canny( res, canny_output, 100, 100*2 );
+
+        findContours( canny_output, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE );
+
+        int morph_size = 5;
+        Mat element = getStructuringElement(MORPH_RECT, Size(2 * morph_size + 1,2 * morph_size + 1), Point(morph_size, morph_size));
         
-        // showing HSV image Notice: imshow always renders in BGR space
-        cv::Mat finalImage;
+        dilate(canny_output, canny_output, element, Point(-1, -1), 1);
+
+        std::sort(contours.begin(), contours.end(), [](const vector<Point>& c1, const vector<Point>& c2){return contourArea(c1, false) < contourArea(c2, false);});
+
+        Mat drawing = Mat::zeros( canny_output.size(), CV_8UC3 );
+        drawContours( drawing, contours, -1, Scalar(0, 255, 0), 10, LINE_8, hierarchy, 0 );
+        */
+       
         //cvtColor(HSVImage, finalImage, cv::COLOR_HSV2BGR);
-        platform_log("Output Path: %s", outputPath);
-        imwrite(outputPath, result);
-        platform_log("Image writed again ");
+        //platform_log("Output Path: %s", outputPath);
+        imwrite(outputPath, img);
+        //platform_log("Image writed again ");
     }
 }

@@ -2,6 +2,19 @@
   "cmake.sourceDirectory": "${workspaceFolder}/android/app",
   "files.associations": {
     "chrono": "cpp",
-    "xlocale": "cpp"
+    "xlocale": "cpp",
+    "array": "cpp",
+    "deque": "cpp",
+    "initializer_list": "cpp",
+    "list": "cpp",
+    "queue": "cpp",
+    "type_traits": "cpp",
+    "vector": "cpp",
+    "xhash": "cpp",
+    "xstring": "cpp",
+    "xtree": "cpp",
+    "xutility": "cpp",
+    "map": "cpp",
+    "unordered_map": "cpp"
   }
 }
