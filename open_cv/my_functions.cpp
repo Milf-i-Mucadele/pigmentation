@@ -52,7 +52,7 @@ extern "C"
         // changing Hue value
         cv::Mat hsv = HSVImage.clone();
         // here
-        cv::Scalar minHSV = cv::Scalar(0, 130, 30);
+        cv::Scalar minHSV = cv::Scalar(4, 102, 0);
         cv::Scalar maxHSV = cv::Scalar(20, 255, 240);
         cv::Mat maskHSV, resultHSV;
         cv::inRange(hsv, minHSV, maxHSV, maskHSV);
@@ -68,23 +68,26 @@ extern "C"
         cv::Mat &S = hsv_vec[1];
         cv::Mat &V = hsv_vec[2];
         // resultHSV = (V > 65); // non-zero pixels in the original image
-        H = 25; // H is between 0-180 in OpenCV
+        H = 30; // H is between 0-180 in OpenCV
         S = 255;
+        V = (V + 20);
         merge(hsv_vec, resultHSV);
         HSVImage = resultHSV; // pigmented image
 
         // OVERLAY
         cv::Mat base = cv::imread(inputImagePath);
+        cv::cvtColor(segmented_img, segmented_img, cv::COLOR_HSV2BGR);
         subtract(base, segmented_img, base);
         // cvtColor(base, base, cv::COLOR_BGR2HSV);
         cv::Mat finalImage;
         cvtColor(HSVImage, finalImage, cv::COLOR_HSV2BGR); // or rgb
 
-        add(finalImage, base, base);
+        // add(finalImage, base, base);
+        base = finalImage + base;
 
         // OUTPUTS
         platform_log("Output Path: %s", outputPath);
-        imwrite(outputPath, base);
+        imwrite(outputPath, base); // then compare withy base
         platform_log("Image writed again ");
     }
 }
