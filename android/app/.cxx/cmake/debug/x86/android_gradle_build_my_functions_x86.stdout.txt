@@ -1,3 +1,2 @@
 ninja: Entering directory `C:\pigmentation\android\app\.cxx\cmake\debug\x86'
-[1/2] Building CXX object CMakeFiles/my_functions.dir/C_/pigmentation/open_cv/my_functions.cpp.o
-[2/2] Linking CXX shared library C:\pigmentation\build\app\intermediates\cmake\debug\obj\x86\libmy_functions.so
+ninja: no work to do.

@@ -1,6 +1,7 @@
 #include <opencv2/opencv.hpp>
 #include <chrono>
 #include "slic.h"
+#include <fstream>
 
 #ifdef __ANDROID__
 
@@ -71,6 +72,7 @@ extern "C"
         cv::Mat& s = hsv_vec[1];
         cv::Mat& v = hsv_vec[2];
         h.setTo(100, v > 1);
+        s.setTo(100, v > 1);
         merge(hsv_vec, res); 
         
 
@@ -112,5 +114,41 @@ extern "C"
         //platform_log("Output Path: %s", outputPath);
         imwrite(outputPath, img);
         //platform_log("Image writed again ");
+    }
+
+
+
+     __attribute__((visibility("default"))) __attribute__((used)) void water_shed(char *inputImagePath, char *outputPath, char *linesFromUser)
+    {
+        cv::Mat img = cv::imread(inputImagePath);
+        cv::Mat markerMask;
+
+        cvtColor(img, markerMask, COLOR_BGR2GRAY);
+        markerMask = Scalar::all(0);
+        ifstream MyReadFile(linesFromUser);
+
+        std::string line;
+        while (std::getline(MyReadFile, line)) {
+            std::vector<int> integers;
+
+            // Declare an input string stream and pass the line to it
+            std::istringstream iss(line);
+
+            // Split the line by a space
+            std::string token;
+            while (iss >> token) {
+            // Convert the token to an integer
+            int n = std::stoi(token);
+            // Add the integer to the vector
+            integers.push_back(n);
+            }
+            platform_log("Output Path: %d", integers.size());
+            Point p1(integers[0], integers[1]);
+            Point p2(integers[2], integers[3]);
+            cv::line(markerMask, p1, p2, Scalar::all(255), 5, 8, 0);   
+            }
+        platform_log("Output Path: %d", 1);
+
+        imwrite(outputPath, markerMask);
     }
 }

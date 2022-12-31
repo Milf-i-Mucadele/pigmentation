@@ -13,6 +13,12 @@ final _convertImageToGrayImage = _lib
     .lookup<NativeFunction<Void Function(Pointer<Utf8>, Pointer<Utf8>)>>(
         'convertImageToGrayImage')
     .asFunction<void Function(Pointer<Utf8>, Pointer<Utf8>)>();
+final _water_shed = _lib
+    .lookup<
+        NativeFunction<
+            Void Function(
+                Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>)>>('water_shed')
+    .asFunction<void Function(Pointer<Utf8>, Pointer<Utf8>, Pointer<Utf8>)>();
 
 String getOpenCVVersion() {
   return _getOpenCVVersion().cast<Utf8>().toDartString();
@@ -20,4 +26,9 @@ String getOpenCVVersion() {
 
 void convertImageToGrayImage(String inputPath, String outputPath) {
   _convertImageToGrayImage(inputPath.toNativeUtf8(), outputPath.toNativeUtf8());
+}
+
+void water_shed(String inputPath, String outputPath, String pointsFile) {
+  _water_shed(inputPath.toNativeUtf8(), outputPath.toNativeUtf8(),
+      pointsFile.toNativeUtf8());
 }

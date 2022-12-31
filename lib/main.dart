@@ -1,9 +1,11 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:open_cv_example/ffi.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:path_provider/path_provider.dart';
 
 void main() {
   runApp(MyApp());
@@ -57,6 +59,23 @@ class _MyHomePageState extends State<MyHomePage> {
       print(outputPath.join("."));
       Stopwatch stopwatch = new Stopwatch()..start();
       convertImageToGrayImage(imagePath!, outputPath.join("."));
+      print('Image convert executed in ${stopwatch.elapsed}');
+      processMillisecond = stopwatch.elapsedMilliseconds;
+      stopwatch.stop();
+      this.setState(() {
+        imagePath = outputPath.join(".");
+      });
+    }
+  }
+
+  void _onConvertClick_water_shed() async {
+    if (imagePath != null) {
+      List<String> outputPath = imagePath!.split(".");
+      outputPath[outputPath.length - 2] =
+          "${outputPath[outputPath.length - 2]}_gray";
+      print(outputPath.join("."));
+      Stopwatch stopwatch = new Stopwatch()..start();
+      water_shed(imagePath!, outputPath.join("."), 'assets/points.txt');
       print('Image convert executed in ${stopwatch.elapsed}');
       processMillisecond = stopwatch.elapsedMilliseconds;
       stopwatch.stop();
