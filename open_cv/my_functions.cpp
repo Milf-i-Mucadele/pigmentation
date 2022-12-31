@@ -120,10 +120,11 @@ extern "C"
 
      __attribute__((visibility("default"))) __attribute__((used)) void water_shed(char *inputImagePath, char *outputPath, char *linesFromUser)
     {
-        cv::Mat img = cv::imread(inputImagePath);
+        cv::Mat img0 = cv::imread(inputImagePath), imgGray, result, result_2, final_image;
+        
         cv::Mat markerMask;
 
-        cvtColor(img, markerMask, COLOR_BGR2GRAY);
+        cvtColor(img0, markerMask, COLOR_BGR2GRAY);
         markerMask = Scalar::all(0);
         ifstream MyReadFile(linesFromUser);
 
@@ -142,13 +143,75 @@ extern "C"
             // Add the integer to the vector
             integers.push_back(n);
             }
-            platform_log("Output Path: %d", integers.size());
+            //platform_log("Output Path: %d", integers.size());
             Point p1(integers[0], integers[1]);
             Point p2(integers[2], integers[3]);
             cv::line(markerMask, p1, p2, Scalar::all(255), 5, 8, 0);   
             }
-        platform_log("Output Path: %d", 1);
+            //platform_log("Output Path: %d", 1);
+            int i, j, compCount = 0;
+            vector<vector<Point> > contours;
+            vector<Vec4i> hierarchy;
+            findContours(markerMask, contours, hierarchy, RETR_CCOMP, CHAIN_APPROX_SIMPLE);
 
-        imwrite(outputPath, markerMask);
+            Mat markers(markerMask.size(), CV_32S);
+            markers = Scalar::all(0);
+            int idx = 0;
+            for( ; idx >= 0; idx = hierarchy[idx][0], compCount++ )
+                drawContours(markers, contours, idx, Scalar::all(compCount+1), -1, 8, hierarchy, INT_MAX);
+
+            vector<Vec3b> colorTab;
+            for( i = 1; i < compCount; i++ )
+            {   
+                int b = i*10;
+                int g = i*10;
+                int r = i*10;
+                //int b = theRNG().uniform(0, 255);
+                //int g = theRNG().uniform(0, 255);
+                //int r = theRNG().uniform(0, 255);
+                colorTab.push_back(Vec3b(b,g,r));
+            }
+            watershed( img0, markers );
+
+            Mat wshed(markers.size(), CV_8UC3);
+            // paint the watershed image
+            for( i = 0; i < markers.rows; i++ )
+                for( j = 0; j < markers.cols; j++ )
+                {
+                    int index = markers.at<int>(i,j);
+                    //cout << index;
+                    if( index == -1 )
+                        wshed.at<Vec3b>(i,j) = Vec3b(255,255,255);
+                    else if( index <= 0 || index > compCount )
+                        wshed.at<Vec3b>(i,j) = Vec3b(0,0,0);
+                    else
+                        wshed.at<Vec3b>(i,j) = colorTab[index - 1];
+                }
+            //wshed = wshed*0.5 + imgGray*0.5;
+            //imshow( "watershed 1", wshed  );
+            cvtColor(wshed, wshed, COLOR_BGR2GRAY);
+            threshold(wshed, wshed, 0, compCount*10-5, THRESH_BINARY);
+            bitwise_and(img0, img0, result, wshed);
+
+            cvtColor(result, result, COLOR_BGR2HSV);
+            
+            vector<Mat> hsv_vec;
+            split(result, hsv_vec); //this is an opencv function
+
+            cv::Mat& h = hsv_vec[0];
+            cv::Mat& s = hsv_vec[1];
+            cv::Mat& v = hsv_vec[2];
+            h.setTo(0, v > 1);
+            s.setTo(100, v > 1);
+            merge(hsv_vec, result);
+            cvtColor(result, result, COLOR_HSV2BGR);
+            //imshow( "watershed 1", wshed);
+
+            threshold(wshed, wshed, 0, 255, THRESH_BINARY_INV);
+            bitwise_and(img0, img0, result_2, wshed);
+
+            final_image = result + result_2;
+            
+        imwrite(outputPath, final_image);
     }
 }
