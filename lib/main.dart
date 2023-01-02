@@ -73,9 +73,16 @@ class _MyHomePageState extends State<MyHomePage> {
       List<String> outputPath = imagePath!.split(".");
       outputPath[outputPath.length - 2] =
           "${outputPath[outputPath.length - 2]}_gray";
-      print(outputPath.join("."));
+      print(outputPath.join(".") + "1");
+      await writeCounter();
+      print(imagePath! + "2");
+      print(outputPath);
+      String path = await _localPath;
+      path = path + "/points.txt";
+      print(path + "4");
+      await readCounter();
       Stopwatch stopwatch = new Stopwatch()..start();
-      water_shed(imagePath!, outputPath.join("."), 'assets/points.txt');
+      water_shed(imagePath!, outputPath.join("."), path);
       print('Image convert executed in ${stopwatch.elapsed}');
       processMillisecond = stopwatch.elapsedMilliseconds;
       stopwatch.stop();
@@ -83,6 +90,34 @@ class _MyHomePageState extends State<MyHomePage> {
         imagePath = outputPath.join(".");
       });
     }
+  }
+
+  Future<String> get _localPath async {
+    final directory = await getApplicationDocumentsDirectory();
+
+    return directory.path;
+  }
+
+  Future<File> get _localFile async {
+    final path = await _localPath;
+    return File('$path/points.txt');
+  }
+
+  Future<void> writeCounter() async {
+    final file = await _localFile;
+    //print(file);
+    file.writeAsString("0 0 100 100");
+    //file.writeAsString("100 100 200 200", mode: FileMode.append);
+    //file.writeAsString("200 200 300 300", mode: FileMode.append);
+    // Write the file
+  }
+
+  Future<void> readCounter() async {
+    final file = await _localFile;
+    //print(file);
+    final contents = await file.readAsString();
+
+    print(contents);
   }
 
   @override
@@ -105,7 +140,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           MaterialButton(
             color: Colors.black,
-            onPressed: _onConvertClick,
+            onPressed: _onConvertClick_water_shed,
             child: Text("Convert Gray Image",
                 style: TextStyle(color: Colors.white)),
           ),

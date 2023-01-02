@@ -121,19 +121,23 @@ extern "C"
      __attribute__((visibility("default"))) __attribute__((used)) void water_shed(char *inputImagePath, char *outputPath, char *linesFromUser)
     {
         cv::Mat img0 = cv::imread(inputImagePath), imgGray, result, result_2, final_image;
-        
+
         cv::Mat markerMask;
 
         cvtColor(img0, markerMask, COLOR_BGR2GRAY);
         markerMask = Scalar::all(0);
         ifstream MyReadFile(linesFromUser);
-
+        platform_log("1111");
+        platform_log(linesFromUser);
+        platform_log("1111");
         std::string line;
         while (std::getline(MyReadFile, line)) {
+            platform_log("1");
             std::vector<int> integers;
 
             // Declare an input string stream and pass the line to it
             std::istringstream iss(line);
+            platform_log("2");
 
             // Split the line by a space
             std::string token;
@@ -143,22 +147,26 @@ extern "C"
             // Add the integer to the vector
             integers.push_back(n);
             }
-            //platform_log("Output Path: %d", integers.size());
+            platform_log("3");
             Point p1(integers[0], integers[1]);
             Point p2(integers[2], integers[3]);
-            cv::line(markerMask, p1, p2, Scalar::all(255), 5, 8, 0);   
+            platform_log("4"); 
+            cv::line(markerMask, p1, p2, Scalar::all(255), 5, 8, 0);
+            platform_log("Output Path: %d", integers[3]);
             }
             //platform_log("Output Path: %d", 1);
             int i, j, compCount = 0;
             vector<vector<Point> > contours;
             vector<Vec4i> hierarchy;
             findContours(markerMask, contours, hierarchy, RETR_CCOMP, CHAIN_APPROX_SIMPLE);
+            platform_log("5"); 
 
             Mat markers(markerMask.size(), CV_32S);
             markers = Scalar::all(0);
             int idx = 0;
             for( ; idx >= 0; idx = hierarchy[idx][0], compCount++ )
                 drawContours(markers, contours, idx, Scalar::all(compCount+1), -1, 8, hierarchy, INT_MAX);
+            platform_log("6"); 
 
             vector<Vec3b> colorTab;
             for( i = 1; i < compCount; i++ )
@@ -172,9 +180,11 @@ extern "C"
                 colorTab.push_back(Vec3b(b,g,r));
             }
             watershed( img0, markers );
+            platform_log("7"); 
 
             Mat wshed(markers.size(), CV_8UC3);
             // paint the watershed image
+            /*
             for( i = 0; i < markers.rows; i++ )
                 for( j = 0; j < markers.cols; j++ )
                 {
@@ -187,6 +197,8 @@ extern "C"
                     else
                         wshed.at<Vec3b>(i,j) = colorTab[index - 1];
                 }
+            */
+            platform_log("8"); 
             //wshed = wshed*0.5 + imgGray*0.5;
             //imshow( "watershed 1", wshed  );
             cvtColor(wshed, wshed, COLOR_BGR2GRAY);
