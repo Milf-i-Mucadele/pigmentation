@@ -2,6 +2,9 @@
 #include <chrono>
 #include "slic.h"
 #include <opencv2/imgproc.hpp>
+#include <iostream>
+#include <fstream>
+#include <string>
 
 #ifdef __ANDROID__
 
@@ -38,6 +41,24 @@ extern "C"
     {
         // inputimage path,color user wants, algortihm, reference points/tap point, output path
 
+        // TXT FILE  READING
+        string myText;
+        ifstream MyReadFile("open_cv/loo.txt");
+        while (getline(MyReadFile, myText))
+        {
+            ofstream MyFile("open_cv/output.txt");
+            // Write to the file
+            MyFile << "Files can be tricky, but it is fun enough!";
+
+            // Close the file
+            MyFile.close();
+            platform_log("logged");
+            platform_log("%s", myText.c_str());
+        }
+
+        // Close the file
+        MyReadFile.close();
+
         platform_log("PATH %s: ", inputImagePath);
         cv::Mat img = cv::imread(inputImagePath);
         platform_log("Length: %d", img.rows);
@@ -52,8 +73,8 @@ extern "C"
         // changing Hue value
         cv::Mat hsv = HSVImage.clone();
         // here
-        cv::Scalar minHSV = cv::Scalar(4, 102, 0);
-        cv::Scalar maxHSV = cv::Scalar(20, 255, 240);
+        cv::Scalar minHSV = cv::Scalar(0, 0, 0);
+        cv::Scalar maxHSV = cv::Scalar(30, 255, 240);
         cv::Mat maskHSV, resultHSV;
         cv::inRange(hsv, minHSV, maxHSV, maskHSV);
         // bitwise_not(maskHSV, maskHSV);
@@ -69,8 +90,11 @@ extern "C"
         cv::Mat &V = hsv_vec[2];
         // resultHSV = (V > 65); // non-zero pixels in the original image
         H = 30; // H is between 0-180 in OpenCV
-        S = 255;
-        V = (V + 20);
+        S = 178;
+        // V = V.mul((V + 20)) / (V + 1);
+        // Mat V_temp = V.mul(V + 20);
+        V = V + 20;
+        // cv::divide(V_temp, V_temp + 1, V);
         merge(hsv_vec, resultHSV);
         HSVImage = resultHSV; // pigmented image
 

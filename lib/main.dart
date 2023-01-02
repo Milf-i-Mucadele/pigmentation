@@ -13,10 +13,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Neyasis Teknolojileri FFI Örneği',
       theme: ThemeData(primarySwatch: Colors.red),
       home: Scaffold(
-        appBar: AppBar(title: Text('Neyasis Teknolojileri FFI Örneği')),
+        appBar: AppBar(title: Text('Shabby Dev')),
         body: SafeArea(child: MyHomePage()),
       ),
     );
