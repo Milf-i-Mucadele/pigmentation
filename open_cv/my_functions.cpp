@@ -74,8 +74,12 @@ extern "C"
         // changing Hue value
         cv::Mat hsv = HSVImage.clone();
         // here
-        cv::Scalar minHSV = cv::Scalar(0, 0, 0);
-        cv::Scalar maxHSV = cv::Scalar(30, 255, 240);
+        // cv::Scalar minHSV = cv::Scalar(0, 0, 0);//wc door
+        cv::Scalar minHSV = cv::Scalar(4, 135, 0); // bed
+
+        cv::Scalar maxHSV = cv::Scalar(20, 255, 240); // bed
+
+        // cv::Scalar maxHSV = cv::Scalar(30, 255, 240); //wc door
         cv::Mat maskHSV, resultHSV;
         cv::inRange(hsv, minHSV, maxHSV, maskHSV);
         // bitwise_not(maskHSV, maskHSV);
@@ -86,18 +90,26 @@ extern "C"
         // SLIC Superpixels
         Mat result;
         Mat Blur_img;
-        GaussianBlur(img, Blur_img, Size(7, 7), 5, 0); // Now finally adding blur to the image
+        Mat greyimg;
+
+        pyrMeanShiftFiltering(segmented_img, Blur_img, 20, 45, 3);
+        // GaussianBlur(segmented_img, Blur_img, Size(7, 7), 5, 0); // Now finally adding blur to the image
+        cvtColor(Blur_img, greyimg, cv::COLOR_HSV2BGR);
+        cvtColor(greyimg, greyimg, cv::COLOR_BGR2GRAY);
+
         SLIC slic;
-        int numSuperpixel = 50;
-        slic.GenerateSuperpixels(Blur_img, numSuperpixel);
+        int numSuperpixel = 4;
+        slic.GenerateSuperpixels(greyimg, numSuperpixel);
         if (img.channels() == 3)
         {
-            result = slic.GetImgWithContours(cv::Scalar(255, 255, 255));
+            result = slic.GetImgWithContours(cv::Scalar(230, 230, 250));
         }
         else
         {
-            result = slic.GetImgWithContours(cv::Scalar(128));
+            result = slic.GetImgWithContours(cv::Scalar(255));
         }
+        cvtColor(result, result, cv::COLOR_GRAY2BGR);
+        cvtColor(Blur_img, greyimg, cv::COLOR_BGR2HSV);
 
         // PIGMENTATION
         vector<Mat> hsv_vec;
@@ -128,7 +140,7 @@ extern "C"
 
         // OUTPUTS
         platform_log("Output Path: %s", outputPath);
-        imwrite(outputPath, Blur_img); // then compare withy base
+        imwrite(outputPath, base); // then compare withy base
         platform_log("Image writed again ");
     }
 }

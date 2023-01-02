@@ -272,8 +272,7 @@ void SLIC::DrawContoursAroundSegments(
 
 void SLIC::DrawContoursAroundSegments(
 	unsigned char *ubuff,
-	const int *labels,
-	const int &width,
+	const int *labels, y const int &width,
 	const int &height,
 	const cv::Scalar &color)
 {
