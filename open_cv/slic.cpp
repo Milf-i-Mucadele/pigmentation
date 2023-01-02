@@ -272,7 +272,8 @@ void SLIC::DrawContoursAroundSegments(
 
 void SLIC::DrawContoursAroundSegments(
 	unsigned char *ubuff,
-	const int *labels, y const int &width,
+	const int *labels,
+	const int &width,
 	const int &height,
 	const cv::Scalar &color)
 {
@@ -305,7 +306,7 @@ void SLIC::DrawContoursAroundSegments(
 					}
 				}
 			}
-			if (np > 1) // change to 2 or 3 for thinner lines
+			if (np > 2) // change to 2 or 3 for thinner lines
 			{
 				ubuff[mainindex] = (uchar)color.val[0];
 				istaken[mainindex] = true;

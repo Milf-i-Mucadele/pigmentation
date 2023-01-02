@@ -75,7 +75,7 @@ extern "C"
         cv::Mat hsv = HSVImage.clone();
         // here
         // cv::Scalar minHSV = cv::Scalar(0, 0, 0);//wc door
-        cv::Scalar minHSV = cv::Scalar(4, 135, 0); // bed
+        cv::Scalar minHSV = cv::Scalar(0, 100, 0); // bed
 
         cv::Scalar maxHSV = cv::Scalar(20, 255, 240); // bed
 
@@ -108,39 +108,76 @@ extern "C"
         {
             result = slic.GetImgWithContours(cv::Scalar(255));
         }
-        cvtColor(result, result, cv::COLOR_GRAY2BGR);
-        cvtColor(Blur_img, greyimg, cv::COLOR_BGR2HSV);
 
-        // PIGMENTATION
-        vector<Mat> hsv_vec;
-        split(resultHSV, hsv_vec); // this is an opencv function
-        cv::Mat &H = hsv_vec[0];
-        cv::Mat &S = hsv_vec[1];
-        cv::Mat &V = hsv_vec[2];
-        // resultHSV = (V > 65); // non-zero pixels in the original image
-        H = 30; // H is between 0-180 in OpenCV
-        S = 178;
-        // V = V.mul((V + 20)) / (V + 1);
-        // Mat V_temp = V.mul(V + 20);
-        V = V + 20;
-        // cv::divide(V_temp, V_temp + 1, V);
-        merge(hsv_vec, resultHSV);
-        HSVImage = resultHSV; // pigmented image
+        int *labels;
 
-        // OVERLAY
-        cv::Mat base = cv::imread(inputImagePath);
-        cv::cvtColor(segmented_img, segmented_img, cv::COLOR_HSV2BGR);
-        subtract(base, segmented_img, base);
-        // cvtColor(base, base, cv::COLOR_BGR2HSV);
-        cv::Mat finalImage;
-        cvtColor(HSVImage, finalImage, cv::COLOR_HSV2BGR); // or rgb
+        labels = slic.GetLabel();
+        int x = 10;
+        int y = 20;
 
-        // add(finalImage, base, base);
-        base = finalImage + base;
+        for (int i = 0; i < result.rows; i++)
+        { // makes the cluster 2 integers 1 , and others zero
+            for (int i2 = 0; i2 < result.cols; i2++)
+            {
+                if (2 == labels[i * result.cols + i2])
+                {
+                    labels[i * result.cols + i2] = 1;
+                    continue;
+                }
+                labels[i * result.cols + i2] = 0;
+            }
+        }
+
+        for (int i = 0; i < img.rows; i++)
+        { // makes the cluster 2 integers 1 , and others zero
+            for (int i2 = 0; i2 < img.cols; i2++)
+            {
+                if (1 == labels[i * result.cols + i2])
+                {
+                    // img[i * result.cols + i2].[0].setTo(30);
+                    // img[i * result.cols + i2].[0].setTo(178);
+                    img.at<cv::Vec3b>(i, i2)[0] = 30;
+                    // img.at<cv::Vec3b>(i, i2)[1] = 178;
+                    img.at<cv::Vec3b>(i, i2)[2] = img.at<cv::Vec3b>(i, i2)[2] + 20;
+
+                    continue;
+                }
+            }
+        }
+
+        // cvtColor(result, result, cv::COLOR_GRAY2BGR);
+        // cvtColor(Blur_img, greyimg, cv::COLOR_BGR2HSV);
+
+        // // PIGMENTATION
+        // vector<Mat> hsv_vec;
+        // split(resultHSV, hsv_vec); // this is an opencv function
+        // cv::Mat &H = hsv_vec[0];
+        // cv::Mat &S = hsv_vec[1];
+        // cv::Mat &V = hsv_vec[2];
+        // // resultHSV = (V > 65); // non-zero pixels in the original image
+        // H = 30; // H is between 0-180 in OpenCV
+        // S = 178;
+        // // V = V.mul((V + 20)) / (V + 1);
+        // // Mat V_temp = V.mul(V + 20);
+        // V = V + 20;
+        // // cv::divide(V_temp, V_temp + 1, V);
+        // merge(hsv_vec, resultHSV);
+        // HSVImage = resultHSV; // pigmented image
+
+        // // OVERLAY
+        // cv::Mat base = cv::imread(inputImagePath);
+        // cv::cvtColor(segmented_img, segmented_img, cv::COLOR_HSV2BGR);
+        // subtract(base, segmented_img, base);
+        // // cvtColor(base, base, cv::COLOR_BGR2HSV);
+        // cv::Mat finalImage;
+        // cvtColor(HSVImage, finalImage, cv::COLOR_HSV2BGR); // or rgb
+
+        // // add(finalImage, base, base);
+        // base = finalImage + base;
 
         // OUTPUTS
         platform_log("Output Path: %s", outputPath);
-        imwrite(outputPath, base); // then compare withy base
+        imwrite(outputPath, img); // then compare withy base
         platform_log("Image writed again ");
     }
 }
