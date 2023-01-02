@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <opencv2/imgcodecs.hpp>
 
 #ifdef __ANDROID__
 
@@ -82,6 +83,22 @@ extern "C"
         cv::Mat segmented_img;
         segmented_img = resultHSV.clone();
 
+        // SLIC Superpixels
+        Mat result;
+        Mat Blur_img;
+        GaussianBlur(img, Blur_img, Size(7, 7), 5, 0); // Now finally adding blur to the image
+        SLIC slic;
+        int numSuperpixel = 50;
+        slic.GenerateSuperpixels(Blur_img, numSuperpixel);
+        if (img.channels() == 3)
+        {
+            result = slic.GetImgWithContours(cv::Scalar(255, 255, 255));
+        }
+        else
+        {
+            result = slic.GetImgWithContours(cv::Scalar(128));
+        }
+
         // PIGMENTATION
         vector<Mat> hsv_vec;
         split(resultHSV, hsv_vec); // this is an opencv function
@@ -111,7 +128,7 @@ extern "C"
 
         // OUTPUTS
         platform_log("Output Path: %s", outputPath);
-        imwrite(outputPath, base); // then compare withy base
+        imwrite(outputPath, Blur_img); // then compare withy base
         platform_log("Image writed again ");
     }
 }
