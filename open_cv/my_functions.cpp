@@ -6,6 +6,9 @@
 #include <fstream>
 #include <string>
 #include <opencv2/imgcodecs.hpp>
+#include <utility>
+#include <vector>
+#include <regex>
 
 #ifdef __ANDROID__
 
@@ -38,9 +41,40 @@ extern "C"
         return CV_VERSION;
     }
 
+    __attribute__((visibility("default"))) __attribute__((used))
+    vector<std::pair<int, int>>
+    parse_coordinates(const std::string &s)
+    {
+        std::vector<std::pair<int, int>> coordinates;
+        std::regex pattern(R"(\(([-+]?\d+),([-+]?\d+)\))");
+        std::smatch match;
+        std::string::const_iterator iter = s.cbegin();
+        while (std::regex_search(iter, s.cend(), match, pattern))
+        {
+            coordinates.emplace_back(std::stoi(match[1]), std::stoi(match[2]));
+            iter = match.suffix().first;
+        }
+        return coordinates;
+    }
+
     __attribute__((visibility("default"))) __attribute__((used)) void convertImageToGrayImage(char *inputImagePath, char *outputPath)
     {
         // inputimage path,color user wants, algortihm, reference points/tap point, output path
+
+        // int r, g, b;
+        // char const *hexColor = "#8060c2";
+        // std::sscanf(hexColor, "#%02x%02x%02x", &r, &g, &b);
+
+        // platform_log("r,g,b: %d,%d,%d", r, g, b);
+
+        std::string s = "(1,2),(3,4),(5,6),(7,8)";
+        std::vector<std::pair<int, int>> coordinates = parse_coordinates(s);
+        for (const std::pair<int, int> &coordinate : coordinates)
+        {
+            std::cout << "(" << coordinate.first << ", " << coordinate.second << ")" << std::endl;
+
+            platform_log("coordinate:%d,%d", coordinate.first, coordinate.second);
+        }
 
         // TXT FILE  READING
         string myText;
@@ -51,8 +85,6 @@ extern "C"
             // Write to the file
             MyFile << "Files can be tricky, but it is fun enough!";
 
-            // Close the file
-            MyFile.close();
             platform_log("logged");
             platform_log("%s", myText.c_str());
         }

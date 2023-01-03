@@ -1,3 +1,7 @@
 ninja: Entering directory `C:\Users\sbura\development\platinpower_2\pigmentation\android\app\.cxx\cmake\debug\x86'
 [1/2] Building CXX object CMakeFiles/my_functions.dir/C_/Users/sbura/development/platinpower_2/pigmentation/open_cv/my_functions.cpp.o
+C:/Users/sbura/development/platinpower_2/pigmentation/open_cv/my_functions.cpp:46:5: warning: 'parse_coordinates' has C-linkage specified, but returns user-defined type 'vector<std::pair<int, int>>' which is incompatible with C [-Wreturn-type-c-linkage]
+    parse_coordinates(const std::string &s)
+    ^
+1 warning generated.
 [2/2] Linking CXX shared library C:\Users\sbura\development\platinpower_2\pigmentation\build\app\intermediates\cmake\debug\obj\x86\libmy_functions.so
