@@ -102,6 +102,7 @@ extern "C"
         cv::Mat clone;
         clone = HSVImage.clone();
         cvtColor(img, HSVImage, cv::COLOR_BGR2HSV);
+        cvtColor(img, img, cv::COLOR_BGR2HSV);
 
         // changing Hue value
         cv::Mat hsv = HSVImage.clone();
@@ -166,13 +167,17 @@ extern "C"
             {
                 if (1 == labels[i * result.cols + i2])
                 {
-                    // img[i * result.cols + i2].[0].setTo(30);
-                    // img[i * result.cols + i2].[0].setTo(178);
-                    img.at<cv::Vec3b>(i, i2)[0] = 30;
-                    // img.at<cv::Vec3b>(i, i2)[1] = 178;
-                    img.at<cv::Vec3b>(i, i2)[2] = img.at<cv::Vec3b>(i, i2)[2] + 20;
+                    if ((resultHSV.at<cv::Vec3b>(i, i2)[2] > 30 && resultHSV.at<cv::Vec3b>(i, i2)[2] < 240) && (resultHSV.at<cv::Vec3b>(i, i2)[2] > 30 && resultHSV.at<cv::Vec3b>(i, i2)[2] < 240))
+                    { // img[i * result.cols + i2].[0].setTo(30);
+                        // img[i * result.cols + i2].[0].setTo(178);
 
-                    continue;
+                        // platform_log("Here");
+                        img.at<cv::Vec3b>(i, i2)[0] = 30;
+                        img.at<cv::Vec3b>(i, i2)[1] = 178;
+                        img.at<cv::Vec3b>(i, i2)[2] = img.at<cv::Vec3b>(i, i2)[2] + 20;
+
+                        continue;
+                    }
                 }
             }
         }
@@ -208,8 +213,11 @@ extern "C"
         // base = finalImage + base;
 
         // OUTPUTS
+        cvtColor(img, img, cv::COLOR_HSV2BGR); // or rgb
+        // cvtColor(segmented_img, segmented_img, cv::COLOR_HSV2BGR); // or rgb
+
         platform_log("Output Path: %s", outputPath);
-        imwrite(outputPath, img); // then compare withy base
+        imwrite(outputPath, img); // then compare withy img
         platform_log("Image writed again ");
     }
 }
