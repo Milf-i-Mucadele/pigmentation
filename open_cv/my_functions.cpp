@@ -108,7 +108,7 @@ extern "C"
         cv::Mat hsv = HSVImage.clone();
         // here
         // cv::Scalar minHSV = cv::Scalar(0, 0, 0);//wc door
-        cv::Scalar minHSV = cv::Scalar(0, 100, 0); // bed
+        cv::Scalar minHSV = cv::Scalar(0, 100, 20); // bed
 
         cv::Scalar maxHSV = cv::Scalar(20, 255, 240); // bed
 
@@ -152,7 +152,7 @@ extern "C"
         { // makes the cluster 2 integers 1 , and others zero
             for (int i2 = 0; i2 < result.cols; i2++)
             {
-                if (2 == labels[i * result.cols + i2])
+                if (1 == labels[i * result.cols + i2])
                 {
                     labels[i * result.cols + i2] = 1;
                     continue;
@@ -165,7 +165,7 @@ extern "C"
         { // makes the cluster 2 integers 1 , and others zero
             for (int i2 = 0; i2 < img.cols; i2++)
             {
-                if (1 == labels[i * result.cols + i2])
+                if (0 == labels[i * result.cols + i2])
                 {
                     if ((resultHSV.at<cv::Vec3b>(i, i2)[2] > 30 && resultHSV.at<cv::Vec3b>(i, i2)[2] < 240) && (resultHSV.at<cv::Vec3b>(i, i2)[2] > 30 && resultHSV.at<cv::Vec3b>(i, i2)[2] < 240))
                     { // img[i * result.cols + i2].[0].setTo(30);
