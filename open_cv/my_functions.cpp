@@ -213,7 +213,7 @@ extern "C"
         // cvtColor(segmented_img, segmented_img, cv::COLOR_HSV2BGR); // or rgb
 
         platform_log("Output Path: %s", outputPath);
-        imwrite(outputPath, result); // then compare withy img
+        imwrite(outputPath, img); // then compare withy img
         platform_log("Image writed again ");
     }
 }

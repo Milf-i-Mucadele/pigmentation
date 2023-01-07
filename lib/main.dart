@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:open_cv_example/ffi.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:image/image.dart' as img_lib;
 
 void main() {
   runApp(MyApp());
@@ -47,7 +48,17 @@ class _MyHomePageState extends State<MyHomePage> {
     final image = await ImagePicker()
         .pickImage(source: ImageSource.gallery, imageQuality: 100);
     if (image == null) return;
+
     setState(() => this.imagePath = image.path);
+
+    img_lib.Image? image_resized =
+        img_lib.decodeImage(new File(this.imagePath!).readAsBytesSync());
+
+    // Resize the image to a 120x? thumbnail (maintaining the aspect ratio).
+    img_lib.Image thumbnail = img_lib.copyResize(image_resized!, width: 800);
+
+    // Save the thumbnail as a PNG.
+    new File(this.imagePath!)..writeAsBytesSync(img_lib.encodePng(thumbnail));
   }
 
   void _onConvertClick() async {
