@@ -92,9 +92,11 @@ extern "C"
         // Close the file
         MyReadFile.close();
 
+        // THE DIMENSIONS OF THE IMAGE
         platform_log("PATH %s: ", inputImagePath);
         cv::Mat img = cv::imread(inputImagePath);
-        platform_log("Length: %d", img.rows);
+        platform_log("Length row: %d", img.rows);
+        platform_log("Length column: %d", img.cols);
 
         // BGR -> HSV changing part
         cv::Mat HSVImage;
@@ -104,29 +106,26 @@ extern "C"
         cvtColor(img, HSVImage, cv::COLOR_BGR2HSV);
         cvtColor(img, img, cv::COLOR_BGR2HSV);
 
-        // changing Hue value
+        // CHANGING HUE VALUE
         cv::Mat hsv = HSVImage.clone();
-        // here
-        // cv::Scalar minHSV = cv::Scalar(0, 0, 0);//wc door
-        cv::Scalar minHSV = cv::Scalar(0, 100, 20); // bed
+        int hue = 18;
+        int min_sat = 68;
+        cv::Scalar minHSV = cv::Scalar(hue - 8, min_sat, 20); // bed
 
-        cv::Scalar maxHSV = cv::Scalar(20, 255, 240); // bed
+        cv::Scalar maxHSV = cv::Scalar(hue + 16, 255, 240); // bed
 
-        // cv::Scalar maxHSV = cv::Scalar(30, 255, 240); //wc door
         cv::Mat maskHSV, resultHSV;
         cv::inRange(hsv, minHSV, maxHSV, maskHSV);
-        // bitwise_not(maskHSV, maskHSV);
         cv::bitwise_and(hsv, hsv, resultHSV, maskHSV);
         cv::Mat segmented_img;
         segmented_img = resultHSV.clone();
 
-        // SLIC Superpixels
+        // SLIC SUPERPIXELS
         Mat result;
         Mat Blur_img;
         Mat greyimg;
 
         pyrMeanShiftFiltering(segmented_img, Blur_img, 20, 45, 3);
-        // GaussianBlur(segmented_img, Blur_img, Size(7, 7), 5, 0); // Now finally adding blur to the image
         cvtColor(Blur_img, greyimg, cv::COLOR_HSV2BGR);
         cvtColor(greyimg, greyimg, cv::COLOR_BGR2GRAY);
 
@@ -168,14 +167,11 @@ extern "C"
                 if (0 == labels[i * result.cols + i2])
                 {
                     if ((resultHSV.at<cv::Vec3b>(i, i2)[2] > 30 && resultHSV.at<cv::Vec3b>(i, i2)[2] < 240) && (resultHSV.at<cv::Vec3b>(i, i2)[2] > 30 && resultHSV.at<cv::Vec3b>(i, i2)[2] < 240))
-                    { // img[i * result.cols + i2].[0].setTo(30);
-                        // img[i * result.cols + i2].[0].setTo(178);
-
+                    {
                         // platform_log("Here");
                         img.at<cv::Vec3b>(i, i2)[0] = 30;
                         img.at<cv::Vec3b>(i, i2)[1] = 178;
                         img.at<cv::Vec3b>(i, i2)[2] = img.at<cv::Vec3b>(i, i2)[2] + 20;
-
                         continue;
                     }
                 }
@@ -217,7 +213,7 @@ extern "C"
         // cvtColor(segmented_img, segmented_img, cv::COLOR_HSV2BGR); // or rgb
 
         platform_log("Output Path: %s", outputPath);
-        imwrite(outputPath, img); // then compare withy img
+        imwrite(outputPath, result); // then compare withy img
         platform_log("Image writed again ");
     }
 }
