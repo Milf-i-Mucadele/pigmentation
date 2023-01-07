@@ -118,112 +118,135 @@ extern "C"
 
 
 
-     __attribute__((visibility("default"))) __attribute__((used)) void water_shed(char *inputImagePath, char *outputPath, char *linesFromUser)
+     __attribute__((visibility("default"))) __attribute__((used)) void water_shed(char *inputImagePath, char *outputPath, char *inputXorImagePath)
     {
-        cv::Mat img0 = cv::imread(inputImagePath), imgGray, result, result_2, final_image;
+        platform_log("***WATERSHED***");
+        cv::Mat img0 = cv::imread(inputImagePath),xor_image,result,result_2,final_image;
+        cv::Mat img_xor = cv::imread(inputXorImagePath);
+        platform_log("%d,%d",img0.rows, img0.cols);
+        platform_log("%d,%d",img_xor.rows, img_xor.cols);
 
-        cv::Mat markerMask;
+        platform_log(inputImagePath);
+        platform_log(outputPath);
+        platform_log(inputXorImagePath);
 
-        cvtColor(img0, markerMask, COLOR_BGR2GRAY);
-        markerMask = Scalar::all(0);
-        ifstream MyReadFile(linesFromUser);
-        platform_log("1111");
-        platform_log(linesFromUser);
-        platform_log("1111");
-        std::string line;
-        while (std::getline(MyReadFile, line)) {
-            platform_log("1");
-            std::vector<int> integers;
-
-            // Declare an input string stream and pass the line to it
-            std::istringstream iss(line);
-            platform_log("2");
-
-            // Split the line by a space
-            std::string token;
-            while (iss >> token) {
-            // Convert the token to an integer
-            int n = std::stoi(token);
-            // Add the integer to the vector
-            integers.push_back(n);
-            }
-            platform_log("3");
-            Point p1(integers[0], integers[1]);
-            Point p2(integers[2], integers[3]);
-            platform_log("4"); 
-            cv::line(markerMask, p1, p2, Scalar::all(255), 5, 8, 0);
-            platform_log("Output Path: %d", integers[3]);
-            }
-            //platform_log("Output Path: %d", 1);
-            int i, j, compCount = 0;
-            vector<vector<Point> > contours;
-            vector<Vec4i> hierarchy;
-            findContours(markerMask, contours, hierarchy, RETR_CCOMP, CHAIN_APPROX_SIMPLE);
-            platform_log("5"); 
-
-            Mat markers(markerMask.size(), CV_32S);
-            markers = Scalar::all(0);
-            int idx = 0;
-            for( ; idx >= 0; idx = hierarchy[idx][0], compCount++ )
-                drawContours(markers, contours, idx, Scalar::all(compCount+1), -1, 8, hierarchy, INT_MAX);
-            platform_log("6"); 
-
-            vector<Vec3b> colorTab;
-            for( i = 1; i < compCount; i++ )
+        bitwise_xor(img0, img_xor, xor_image);
+        cvtColor(xor_image, xor_image, COLOR_BGR2GRAY);
+        threshold(xor_image, xor_image, 0, 255, THRESH_BINARY);
+        cv::Mat element_ = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
+        //erode( wshed, wshed, element );
+        //imshow( "erode", wshed );
+        dilate( xor_image, xor_image, element_ );
+        erode( xor_image, xor_image, element_ );
+        erode( xor_image, xor_image, element_ );
+        erode( xor_image, xor_image, element_ );
+        erode( xor_image, xor_image, element_ );
+        //imwrite(outputPath, xor_image);
+        //cout << xor_image;
+        int i, j,mini=999,minj=999,maxi=-10,maxj=-10, compCount = 0;
+        //imshow("1",xor_image);
+        for( i = 0; i < xor_image.rows; i++ )
+            for( j = 0; j < xor_image.cols; j++ )
             {   
-                int b = i*10;
-                int g = i*10;
-                int r = i*10;
-                //int b = theRNG().uniform(0, 255);
-                //int g = theRNG().uniform(0, 255);
-                //int r = theRNG().uniform(0, 255);
-                colorTab.push_back(Vec3b(b,g,r));
+                //cout << xor_image.at<uchar>(i,j);
+                if( xor_image.at<uchar>(i,j) == 255 ){
+                    if (i < mini)
+                    mini = i;
+                    if (i > maxi)
+                    maxi = i;
+                    if (j < minj)
+                    minj = j;
+                    if (j > maxj)
+                    maxj = j;
+                    }
             }
-            watershed( img0, markers );
-            platform_log("7"); 
+        cvtColor(xor_image, xor_image, COLOR_GRAY2BGR);
+        platform_log("%d,%d,%d,%d",mini,minj,maxi,maxj);
+        // Top Left Corner
+        Point p1(minj-50, mini-50);
+    
+        // Bottom Right Corner
+        Point p2(maxj+50, maxi+50);
+        //Point center(minj, mini);//Declaring the center point
+        //circle(xor_image, center,10, Scalar(0,255,0), 3);//Using circle()function to draw the line//
+        //Point center2(maxj, maxi);//Declaring the center point
+        //circle(xor_image, center2,10, Scalar(0,255,0), 3);//Using circle()function to draw the line//
+        rectangle(xor_image, p1,p2, Scalar(255,255,255), 2);
 
-            Mat wshed(markers.size(), CV_8UC3);
-            // paint the watershed image
-            /*
-            for( i = 0; i < markers.rows; i++ )
-                for( j = 0; j < markers.cols; j++ )
-                {
-                    int index = markers.at<int>(i,j);
-                    //cout << index;
-                    if( index == -1 )
-                        wshed.at<Vec3b>(i,j) = Vec3b(255,255,255);
-                    else if( index <= 0 || index > compCount )
-                        wshed.at<Vec3b>(i,j) = Vec3b(0,0,0);
-                    else
-                        wshed.at<Vec3b>(i,j) = colorTab[index - 1];
-                }
-            */
-            platform_log("8"); 
-            //wshed = wshed*0.5 + imgGray*0.5;
-            //imshow( "watershed 1", wshed  );
-            cvtColor(wshed, wshed, COLOR_BGR2GRAY);
-            threshold(wshed, wshed, 0, compCount*10-5, THRESH_BINARY);
-            bitwise_and(img0, img0, result, wshed);
+        //cout << mini << endl;
+        //cout << maxi << endl;
+        //cout << minj << endl;
+        //cout << maxj << endl;
+        cvtColor(xor_image, xor_image, COLOR_BGR2GRAY);
+        //imshow("2",xor_image);
+        vector<vector<Point> > contours;
+        vector<Vec4i> hierarchy;
+        findContours(xor_image, contours, hierarchy, RETR_CCOMP, CHAIN_APPROX_SIMPLE);
 
-            cvtColor(result, result, COLOR_BGR2HSV);
-            
-            vector<Mat> hsv_vec;
-            split(result, hsv_vec); //this is an opencv function
+        Mat markers(xor_image.size(), CV_32S);
+        markers = Scalar::all(0);
+        int idx = 0;
+        for( ; idx >= 0; idx = hierarchy[idx][0], compCount++ )
+            drawContours(markers, contours, idx, Scalar::all(compCount+1), -1, 8, hierarchy, INT_MAX);
 
-            cv::Mat& h = hsv_vec[0];
-            cv::Mat& s = hsv_vec[1];
-            cv::Mat& v = hsv_vec[2];
-            h.setTo(0, v > 1);
-            s.setTo(100, v > 1);
-            merge(hsv_vec, result);
-            cvtColor(result, result, COLOR_HSV2BGR);
-            //imshow( "watershed 1", wshed);
+        vector<Vec3b> colorTab;
+        for( i = 0; i < compCount; i++ )
+        {
+            int b = i*20;
+            int g = i*20;
+            int r = i*20;
+            colorTab.push_back(Vec3b(b,g,r));
+        }
+        watershed( img0, markers );
 
-            threshold(wshed, wshed, 0, 255, THRESH_BINARY_INV);
-            bitwise_and(img0, img0, result_2, wshed);
+        Mat wshed(markers.size(), CV_8UC3);
+        // paint the watershed image
+        for( i = 0; i < markers.rows; i++ )
+            for( j = 0; j < markers.cols; j++ )
+            {
+                int index = markers.at<int>(i,j);
+                //platform_log("%d",index);
+                if( index == -1 )
+                    wshed.at<cv::Vec3b>(i,j) = cv::Vec3b(255,255,255);
+                else if( index <= 0 || index > compCount )
+                    wshed.at<cv::Vec3b>(i,j) = cv::Vec3b(0,0,0);
+                else
+                    wshed.at<cv::Vec3b>(i,j) = colorTab[index - 1];
+            }
+        //wshed = wshed*0.5 + imgGray*0.5;
+        //imshow( "watershed1", wshed );
+        cvtColor(wshed, wshed, COLOR_BGR2GRAY);
+        //cout << compCount;
+        threshold(wshed, wshed, (compCount-2)*20, 255, THRESH_BINARY_INV);
+        //bitwise_and(img0, img0, result, wshed);
+        //imshow( "watershed2", wshed );
+        cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
+        //erode( wshed, wshed, element );
+        //imshow( "erode", wshed );
+        dilate( wshed, wshed, element );
+        //imshow( "dilate", wshed );
+        bitwise_and(img0, img0, result, wshed);
+        //cout << wshed;
+        //threshold(wshed, wshed, 0, 255, THRESH_BINARY);
 
-            final_image = result + result_2;
-            
+        cvtColor(result, result, COLOR_BGR2HSV);
+        
+        vector<Mat> hsv_vec;
+        split(result, hsv_vec); //this is an opencv function
+
+        cv::Mat& h = hsv_vec[0];
+        cv::Mat& s = hsv_vec[1];
+        cv::Mat& v = hsv_vec[2];
+        h.setTo(50, v > 1);
+        s.setTo(100, v > 1);
+        merge(hsv_vec, result);
+        cvtColor(result, result, COLOR_HSV2BGR);
+        //imshow( "result", result );
+        threshold(wshed, wshed, 0, 255, THRESH_BINARY_INV);
+        //imshow( "watershed 1", wshed);
+        bitwise_and(img0, img0, result_2, wshed);
+
+        final_image = result + result_2;            
         imwrite(outputPath, final_image);
     }
 }
