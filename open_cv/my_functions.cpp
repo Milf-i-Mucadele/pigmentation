@@ -108,11 +108,11 @@ extern "C"
 
         // CHANGING HUE VALUE
         cv::Mat hsv = HSVImage.clone();
-        int hue = 18;
-        int min_sat = 68;
-        cv::Scalar minHSV = cv::Scalar(hue - 8, min_sat, 20); // bed
+        int hue = 16;                                          //+-15
+        int min_sat = 100;                                     //-%30
+        cv::Scalar minHSV = cv::Scalar(hue - 16, min_sat, 20); // bed
 
-        cv::Scalar maxHSV = cv::Scalar(hue + 16, 255, 240); // bed
+        cv::Scalar maxHSV = cv::Scalar(hue + 15, 255, 240); // bed
 
         cv::Mat maskHSV, resultHSV;
         cv::inRange(hsv, minHSV, maxHSV, maskHSV);
@@ -164,7 +164,7 @@ extern "C"
         { // makes the cluster 2 integers 1 , and others zero
             for (int i2 = 0; i2 < img.cols; i2++)
             {
-                if (0 == labels[i * result.cols + i2])
+                if (1 == labels[i * result.cols + i2])
                 {
                     if ((resultHSV.at<cv::Vec3b>(i, i2)[2] > 30 && resultHSV.at<cv::Vec3b>(i, i2)[2] < 240) && (resultHSV.at<cv::Vec3b>(i, i2)[2] > 30 && resultHSV.at<cv::Vec3b>(i, i2)[2] < 240))
                     {
