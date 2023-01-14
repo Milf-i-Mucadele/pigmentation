@@ -72,3 +72,16 @@
 3192	3302	694794711	C:/Users/sbura/development/platinpower_2/pigmentation/build/app/intermediates/cmake/debug/obj/x86_64/libmy_functions.so	b76a16d8dc415dfa
 3	2756	694794819	CMakeFiles/my_functions.dir/C_/Users/sbura/development/platinpower_2/pigmentation/open_cv/my_functions.cpp.o	9c6a8581922c42c5
 2756	2863	694794820	C:/Users/sbura/development/platinpower_2/pigmentation/build/app/intermediates/cmake/debug/obj/x86_64/libmy_functions.so	b76a16d8dc415dfa
+6	2247	694975500	CMakeFiles/my_functions.dir/C_/Users/sbura/development/platinpower_2/pigmentation/open_cv/slic.cpp.o	fbebf00183b260a1
+2	3071	694975501	CMakeFiles/my_functions.dir/C_/Users/sbura/development/platinpower_2/pigmentation/open_cv/my_functions.cpp.o	9c6a8581922c42c5
+3071	3196	694975501	C:/Users/sbura/development/platinpower_2/pigmentation/build/app/intermediates/cmake/debug/obj/x86_64/libmy_functions.so	b76a16d8dc415dfa
+3	2846	694975618	CMakeFiles/my_functions.dir/C_/Users/sbura/development/platinpower_2/pigmentation/open_cv/my_functions.cpp.o	9c6a8581922c42c5
+2846	2969	694975618	C:/Users/sbura/development/platinpower_2/pigmentation/build/app/intermediates/cmake/debug/obj/x86_64/libmy_functions.so	b76a16d8dc415dfa
+4	2887	694975844	CMakeFiles/my_functions.dir/C_/Users/sbura/development/platinpower_2/pigmentation/open_cv/my_functions.cpp.o	9c6a8581922c42c5
+2887	3016	694975844	C:/Users/sbura/development/platinpower_2/pigmentation/build/app/intermediates/cmake/debug/obj/x86_64/libmy_functions.so	b76a16d8dc415dfa
+3	3315	694976071	CMakeFiles/my_functions.dir/C_/Users/sbura/development/platinpower_2/pigmentation/open_cv/my_functions.cpp.o	9c6a8581922c42c5
+3315	3447	694976071	C:/Users/sbura/development/platinpower_2/pigmentation/build/app/intermediates/cmake/debug/obj/x86_64/libmy_functions.so	b76a16d8dc415dfa
+3	2823	694976131	CMakeFiles/my_functions.dir/C_/Users/sbura/development/platinpower_2/pigmentation/open_cv/my_functions.cpp.o	9c6a8581922c42c5
+2824	2930	694976131	C:/Users/sbura/development/platinpower_2/pigmentation/build/app/intermediates/cmake/debug/obj/x86_64/libmy_functions.so	b76a16d8dc415dfa
+2	2841	694976273	CMakeFiles/my_functions.dir/C_/Users/sbura/development/platinpower_2/pigmentation/open_cv/my_functions.cpp.o	9c6a8581922c42c5
+2841	2946	694976273	C:/Users/sbura/development/platinpower_2/pigmentation/build/app/intermediates/cmake/debug/obj/x86_64/libmy_functions.so	b76a16d8dc415dfa

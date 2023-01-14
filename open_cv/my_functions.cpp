@@ -130,7 +130,7 @@ extern "C"
         cvtColor(greyimg, greyimg, cv::COLOR_BGR2GRAY);
 
         SLIC slic;
-        int numSuperpixel = 4;
+        int numSuperpixel = 3;
         slic.GenerateSuperpixels(greyimg, numSuperpixel);
         if (img.channels() == 3)
         {
@@ -164,13 +164,13 @@ extern "C"
         { // makes the cluster 2 integers 1 , and others zero
             for (int i2 = 0; i2 < img.cols; i2++)
             {
-                if (1 == labels[i * result.cols + i2])
+                if (1 == labels[i * result.cols + i2]) //|| 0 == labels[i * result.cols + i2]
                 {
                     if ((resultHSV.at<cv::Vec3b>(i, i2)[2] > 30 && resultHSV.at<cv::Vec3b>(i, i2)[2] < 240) && (resultHSV.at<cv::Vec3b>(i, i2)[2] > 30 && resultHSV.at<cv::Vec3b>(i, i2)[2] < 240))
                     {
                         // platform_log("Here");
-                        img.at<cv::Vec3b>(i, i2)[0] = 30;
-                        img.at<cv::Vec3b>(i, i2)[1] = 178;
+                        img.at<cv::Vec3b>(i, i2)[0] = 18;
+                        img.at<cv::Vec3b>(i, i2)[1] = 80;
                         img.at<cv::Vec3b>(i, i2)[2] = img.at<cv::Vec3b>(i, i2)[2] + 20;
                         continue;
                     }
