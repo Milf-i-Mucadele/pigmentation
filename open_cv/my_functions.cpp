@@ -43,13 +43,13 @@ extern "C"
 
     __attribute__((visibility("default"))) __attribute__((used))
     vector<std::pair<int, int>>
-    parse_coordinates(const std::string &s)
+    parse_coordinates(const std::string &str)
     {
         std::vector<std::pair<int, int>> coordinates;
         std::regex pattern(R"(\(([-+]?\d+),([-+]?\d+)\))");
         std::smatch match;
-        std::string::const_iterator iter = s.cbegin();
-        while (std::regex_search(iter, s.cend(), match, pattern))
+        std::string::const_iterator iter = str.cbegin();
+        while (std::regex_search(iter, str.cend(), match, pattern))
         {
             coordinates.emplace_back(std::stoi(match[1]), std::stoi(match[2]));
             iter = match.suffix().first;
@@ -67,8 +67,8 @@ extern "C"
 
         // platform_log("r,g,b: %d,%d,%d", r, g, b);
 
-        std::string s = "(1,2),(3,4),(5,6),(7,8)";
-        std::vector<std::pair<int, int>> coordinates = parse_coordinates(s);
+        std::string str = "(1,2),(3,4),(5,6),(7,8)";
+        std::vector<std::pair<int, int>> coordinates = parse_coordinates(str);
         for (const std::pair<int, int> &coordinate : coordinates)
         {
             std::cout << "(" << coordinate.first << ", " << coordinate.second << ")" << std::endl;
@@ -100,19 +100,18 @@ extern "C"
 
         // BGR -> HSV changing part
         cv::Mat HSVImage;
-        cv::Mat original = HSVImage.clone();
-        cv::Mat clone;
-        clone = HSVImage.clone();
         cvtColor(img, HSVImage, cv::COLOR_BGR2HSV);
         cvtColor(img, img, cv::COLOR_BGR2HSV);
+        // BLUR THE SEGMENTED IMAGE  todo maybe this place will come after segmentation
+        blur(HSVImage, HSVImage, Size(30, 30));
 
-        // CHANGING HUE VALUE
+        // COLOR SEGMENTATION
         cv::Mat hsv = HSVImage.clone();
-        int hue = 16;                                          //+-15
-        int min_sat = 100;                                     //-%30
-        cv::Scalar minHSV = cv::Scalar(hue - 16, min_sat, 20); // bed
+        int hue = 16;     //-15+15
+        int min_sat = 30; //-40
 
-        cv::Scalar maxHSV = cv::Scalar(hue + 15, 255, 240); // bed
+        cv::Scalar minHSV = cv::Scalar(hue - 16, min_sat - 40, 20); // bed
+        cv::Scalar maxHSV = cv::Scalar(hue + 15, 255, 240);         // bed was +30
 
         cv::Mat maskHSV, resultHSV;
         cv::inRange(hsv, minHSV, maxHSV, maskHSV);
@@ -120,100 +119,63 @@ extern "C"
         cv::Mat segmented_img;
         segmented_img = resultHSV.clone();
 
-        // SLIC SUPERPIXELS
-        Mat result;
-        Mat Blur_img;
-        Mat greyimg;
+        // FINDIND THE RELATED CONTOURS
+        int thresh = 20;
+        Mat segmented_img_gray;
+        cvtColor(segmented_img, segmented_img_gray, COLOR_BGR2GRAY);
+        threshold(segmented_img_gray, segmented_img_gray, thresh, 255, THRESH_BINARY);
+        vector<vector<Point>> contours;
+        vector<Vec4i> hierarchy;
+        findContours(segmented_img_gray, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);
 
-        pyrMeanShiftFiltering(segmented_img, Blur_img, 20, 45, 3);
-        cvtColor(Blur_img, greyimg, cv::COLOR_HSV2BGR);
-        cvtColor(greyimg, greyimg, cv::COLOR_BGR2GRAY);
+        Mat drawing = Mat::zeros(segmented_img_gray.size(), CV_8UC3);
+        int poi_cnt;
+        Scalar color = Scalar(255, 255, 255);
+        Scalar line_Color(0, 255, 0);
 
-        SLIC slic;
-        int numSuperpixel = 3;
-        slic.GenerateSuperpixels(greyimg, numSuperpixel);
-        if (img.channels() == 3)
+        Point p1(400, 600); // todo: this will be read fromn txt file
+
+        // FIND THE RELEVANT CONTOUR
+        for (size_t i = 0; i < contours.size(); i++)
         {
-            result = slic.GetImgWithContours(cv::Scalar(230, 230, 250));
-        }
-        else
-        {
-            result = slic.GetImgWithContours(cv::Scalar(255));
-        }
-
-        int *labels;
-
-        labels = slic.GetLabel();
-        int x = 10;
-        int y = 20;
-
-        for (int i = 0; i < result.rows; i++)
-        { // makes the cluster 2 integers 1 , and others zero
-            for (int i2 = 0; i2 < result.cols; i2++)
+            int result_poly = pointPolygonTest(contours[i], p1, false);
+            if (result_poly == 1)
             {
-                if (1 == labels[i * result.cols + i2])
-                {
-                    labels[i * result.cols + i2] = 1;
-                    continue;
-                }
-                labels[i * result.cols + i2] = 0;
+                drawContours(drawing, contours, (int)i, color, -1, LINE_8, hierarchy, 0);
             }
         }
 
-        for (int i = 0; i < img.rows; i++)
-        { // makes the cluster 2 integers 1 , and others zero
-            for (int i2 = 0; i2 < img.cols; i2++)
-            {
-                if (1 == labels[i * result.cols + i2]) //|| 0 == labels[i * result.cols + i2]
-                {
-                    if ((resultHSV.at<cv::Vec3b>(i, i2)[2] > 30 && resultHSV.at<cv::Vec3b>(i, i2)[2] < 240) && (resultHSV.at<cv::Vec3b>(i, i2)[2] > 30 && resultHSV.at<cv::Vec3b>(i, i2)[2] < 240))
-                    {
-                        // platform_log("Here");
-                        img.at<cv::Vec3b>(i, i2)[0] = 18;
-                        img.at<cv::Vec3b>(i, i2)[1] = 80;
-                        img.at<cv::Vec3b>(i, i2)[2] = img.at<cv::Vec3b>(i, i2)[2] + 20;
-                        continue;
-                    }
-                }
-            }
-        }
+        // PIGMENTATION
+        Mat result, result2, background, final_image;
 
-        // cvtColor(result, result, cv::COLOR_GRAY2BGR);
-        // cvtColor(Blur_img, greyimg, cv::COLOR_BGR2HSV);
+        cvtColor(drawing, drawing, COLOR_BGR2GRAY);
+        bitwise_and(img, img, result, drawing);
+        cvtColor(result, result, COLOR_BGR2HSV);
 
-        // // PIGMENTATION
-        // vector<Mat> hsv_vec;
-        // split(resultHSV, hsv_vec); // this is an opencv function
-        // cv::Mat &H = hsv_vec[0];
-        // cv::Mat &S = hsv_vec[1];
-        // cv::Mat &V = hsv_vec[2];
-        // // resultHSV = (V > 65); // non-zero pixels in the original image
-        // H = 30; // H is between 0-180 in OpenCV
-        // S = 178;
-        // // V = V.mul((V + 20)) / (V + 1);
-        // // Mat V_temp = V.mul(V + 20);
-        // V = V + 20;
-        // // cv::divide(V_temp, V_temp + 1, V);
-        // merge(hsv_vec, resultHSV);
-        // HSVImage = resultHSV; // pigmented image
+        vector<Mat> hsv_vec;
+        split(result, hsv_vec); // this is an opencv function
 
-        // // OVERLAY
-        // cv::Mat base = cv::imread(inputImagePath);
-        // cv::cvtColor(segmented_img, segmented_img, cv::COLOR_HSV2BGR);
-        // subtract(base, segmented_img, base);
-        // // cvtColor(base, base, cv::COLOR_BGR2HSV);
-        // cv::Mat finalImage;
-        // cvtColor(HSVImage, finalImage, cv::COLOR_HSV2BGR); // or rgb
+        cv::Mat &h = hsv_vec[0];
+        cv::Mat &s = hsv_vec[1];
+        cv::Mat &v = hsv_vec[2];
+        h.setTo(30, v > 1);
+        s.setTo(178, v > 1);
+        v = v + 20;
+        merge(hsv_vec, result);
 
-        // // add(finalImage, base, base);
-        // base = finalImage + base;
+        // BACKGROUND
 
-        // OUTPUTS
-        cvtColor(img, img, cv::COLOR_HSV2BGR); // or rgb
-        // cvtColor(segmented_img, segmented_img, cv::COLOR_HSV2BGR); // or rgb
+        cvtColor(result, result, COLOR_HSV2BGR);
+        cvtColor(result, result2, COLOR_BGR2GRAY);
+
+        threshold(result2, result2, 20, 255, THRESH_BINARY_INV);
+        bitwise_and(img, img, background, result2);
+        cvtColor(background, background, cv::COLOR_HSV2BGR); // or rgb
+
+        final_image = result + background;
 
         platform_log("Output Path: %s", outputPath);
-        imwrite(outputPath, img); // then compare withy img
+        imwrite(outputPath, final_image); // then compare withy img
         platform_log("Image writed again ");
     }
 }
