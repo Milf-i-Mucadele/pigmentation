@@ -55,7 +55,7 @@ class _MyHomePageState extends State<MyHomePage> {
         img_lib.decodeImage(new File(this.imagePath!).readAsBytesSync());
 
     // Resize the image to a 120x? thumbnail (maintaining the aspect ratio).
-    img_lib.Image thumbnail = img_lib.copyResize(image_resized!, width: 900);
+    img_lib.Image thumbnail = img_lib.copyResize(image_resized!, width: 600);
 
     // Save the thumbnail as a PNG.
     new File(this.imagePath!)..writeAsBytesSync(img_lib.encodePng(thumbnail));

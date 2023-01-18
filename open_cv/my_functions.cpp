@@ -107,11 +107,13 @@ extern "C"
 
         // COLOR SEGMENTATION
         cv::Mat hsv = HSVImage.clone();
-        int hue = 16;     //-15+15
+        int hue = 16;     //-15+15 for door
         int min_sat = 30; //-40
+        // int hue = 16;
+        // int min_sat = 150;
 
         cv::Scalar minHSV = cv::Scalar(hue - 16, min_sat - 40, 20); // bed
-        cv::Scalar maxHSV = cv::Scalar(hue + 15, 255, 240);         // bed was +30
+        cv::Scalar maxHSV = cv::Scalar(hue + 16, 255, 240);         // bed was +30
 
         cv::Mat maskHSV, resultHSV;
         cv::inRange(hsv, minHSV, maxHSV, maskHSV);
@@ -133,12 +135,13 @@ extern "C"
         Scalar color = Scalar(255, 255, 255);
         Scalar line_Color(0, 255, 0);
 
-        Point p1(400, 600); // todo: this will be read fromn txt file
+        Point p1(350, 520); // todo: this will be read fromn txt file 350,520 for kapi
 
         // FIND THE RELEVANT CONTOUR
         for (size_t i = 0; i < contours.size(); i++)
         {
             int result_poly = pointPolygonTest(contours[i], p1, false);
+            // drawContours(drawing, contours, (int)i, color, -1, LINE_8, hierarchy, 0);
             if (result_poly == 1)
             {
                 drawContours(drawing, contours, (int)i, color, -1, LINE_8, hierarchy, 0);
@@ -158,13 +161,23 @@ extern "C"
         cv::Mat &h = hsv_vec[0];
         cv::Mat &s = hsv_vec[1];
         cv::Mat &v = hsv_vec[2];
-        h.setTo(30, v > 1);
-        s.setTo(178, v > 1);
+
+        double minVal;
+        double maxVal;
+        Point minLoc;
+        Point maxLoc;
+        minMaxLoc(s, &minVal, &maxVal, &minLoc, &maxLoc);
+
+        h.setTo(21, v > 1);
+        // s = 62;
+        // s.setTo(62, v > 1);
+        s = s / maxVal;
+        s = s + 0.1;
+        s = s * 155;
         v = v + 20;
         merge(hsv_vec, result);
 
         // BACKGROUND
-
         cvtColor(result, result, COLOR_HSV2BGR);
         cvtColor(result, result2, COLOR_BGR2GRAY);
 
@@ -174,6 +187,11 @@ extern "C"
 
         final_image = result + background;
 
+        // cvtColor(final_image, final_image_gray, COLOR_BGR2GRAY);
+        // equalizeHist(final_image_gray, equalized);
+        // cvtColor(final_image_gray, equalized, COLOR_GRAY2BGR);
+
+        // RETURNING
         platform_log("Output Path: %s", outputPath);
         imwrite(outputPath, final_image); // then compare withy img
         platform_log("Image writed again ");
