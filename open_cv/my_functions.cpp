@@ -34,84 +34,127 @@ extern "C"
         return CV_VERSION;
     }
 
+    __attribute__((visibility("default"))) __attribute__((used))
+    vector<std::pair<int, int>>
+    parse_coordinates(const std::string &str)
+    {
+        std::vector<std::pair<int, int>> coordinates;
+        std::regex pattern(R"(\(([-+]?\d+),([-+]?\d+)\))");
+        std::smatch match;
+        std::string::const_iterator iter = str.cbegin();
+        while (std::regex_search(iter, str.cend(), match, pattern))
+        {
+            coordinates.emplace_back(std::stoi(match[1]), std::stoi(match[2]));
+            iter = match.suffix().first;
+        }
+        return coordinates;
+    }
+
     __attribute__((visibility("default"))) __attribute__((used)) void convertImageToGrayImage(char *inputImagePath, char *outputPath)
     {
-        // platform_log("PATH %s: ", inputImagePath);
+        // THE DIMENSIONS OF THE IMAGE
+        platform_log("PATH %s: ", inputImagePath);
         cv::Mat img = cv::imread(inputImagePath);
-        // platform_log("Length: %d", img.rows);
-        // cvtColor(img, img, COLOR_BGR2RGB);
-        cv::Mat hsv, mask, res, result;
+        platform_log("Length row: %d", img.rows);
+        platform_log("Length column: %d", img.cols);
 
-        // medianBlur(img,blur, 5);
-        // bilateralFilter(blur2,blur3, 9, 75, 75);
-        cvtColor(img, hsv, COLOR_BGR2HSV);
-        GaussianBlur(hsv, hsv, Size(5, 5), 0);
-        /*
+        // BGR -> HSV changing part
+        cv::Mat HSVImage;
+        cvtColor(img, HSVImage, cv::COLOR_BGR2HSV);
+        cvtColor(img, img, cv::COLOR_BGR2HSV);
+        // BLUR THE SEGMENTED IMAGE  todo maybe this place will come after segmentation
+        blur(HSVImage, HSVImage, Size(30, 30));
+
+        // COLOR SEGMENTATION
+        cv::Mat hsv = HSVImage.clone();
+        int hue = 16;     //-15+15 for door
+        int min_sat = 30; //-40
+        // int hue = 16;
+        // int min_sat = 150;
+
+        cv::Scalar minHSV = cv::Scalar(hue - 16, min_sat - 40, 20); // bed
+        cv::Scalar maxHSV = cv::Scalar(hue + 16, 255, 240);         // bed was +30
+
+        cv::Mat maskHSV, resultHSV;
+        cv::inRange(hsv, minHSV, maxHSV, maskHSV);
+        cv::bitwise_and(hsv, hsv, resultHSV, maskHSV);
+        cv::Mat segmented_img;
+        segmented_img = resultHSV.clone();
+
+        // FINDIND THE RELATED CONTOURS
+        int thresh = 20;
+        Mat segmented_img_gray;
+        cvtColor(segmented_img, segmented_img_gray, COLOR_BGR2GRAY);
+        threshold(segmented_img_gray, segmented_img_gray, thresh, 255, THRESH_BINARY);
+        vector<vector<Point>> contours;
+        vector<Vec4i> hierarchy;
+        findContours(segmented_img_gray, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);
+
+        Mat drawing = Mat::zeros(segmented_img_gray.size(), CV_8UC3);
+        int poi_cnt;
+        Scalar color = Scalar(255, 255, 255);
+        Scalar line_Color(0, 255, 0);
+
+        Point p1(350, 520); // todo: this will be read fromn txt file 350,520 for kapi
+
+        // FIND THE RELEVANT CONTOUR
+        for (size_t i = 0; i < contours.size(); i++)
+        {
+            int result_poly = pointPolygonTest(contours[i], p1, false);
+            // drawContours(drawing, contours, (int)i, color, -1, LINE_8, hierarchy, 0);
+            if (result_poly == 1)
+            {
+                drawContours(drawing, contours, (int)i, color, -1, LINE_8, hierarchy, 0);
+            }
+        }
+
+        // PIGMENTATION
+        Mat result, result2, background, final_image;
+
+        cvtColor(drawing, drawing, COLOR_BGR2GRAY);
+        bitwise_and(img, img, result, drawing);
+        cvtColor(result, result, COLOR_BGR2HSV);
+
         vector<Mat> hsv_vec;
-        split(hsv, hsv_vec); //this is an opencv function
-
-        cv::Mat& h = hsv_vec[0];
-        cv::Mat& s = hsv_vec[1];
-        cv::Mat& l = hsv_vec[2];
-
-        //l.setTo(130, l > 30);
-        merge(hsv_vec, hsv);
-        */
-        cv::Scalar minHSV = cv::Scalar(0, 130, 30);
-        cv::Scalar maxHSV = cv::Scalar(20, 255, 240);
-
-        inRange(hsv, minHSV, maxHSV, mask);
-        bitwise_and(hsv, hsv, res, mask);
-        cvtColor(res, res, COLOR_HSV2BGR);
-
-        vector<Mat> hsv_vec;
-        split(res, hsv_vec); // this is an opencv function
+        split(result, hsv_vec); // this is an opencv function
 
         cv::Mat &h = hsv_vec[0];
         cv::Mat &s = hsv_vec[1];
         cv::Mat &v = hsv_vec[2];
-        h.setTo(100, v > 1);
-        s.setTo(100, v > 1);
-        merge(hsv_vec, res);
 
-        threshold(mask, mask, 0, 255, THRESH_BINARY_INV);
-        bitwise_and(img, img, result, mask);
-        img = result + res;
+        double minVal;
+        double maxVal;
+        Point minLoc;
+        Point maxLoc;
+        minMaxLoc(s, &minVal, &maxVal, &minLoc, &maxLoc);
 
-        /*
-        SLIC slic;
-        int numSuperpixel = 5;
-        slic.GenerateSuperpixels(res, numSuperpixel);
+        h.setTo(30, v > 1);
+        // s = 62;
+        // s.setTo(142, v > 1);
+        s = s / maxVal;
+        s = s + 0.2;
+        s = s * 178;
+        v = v + 20;
+        merge(hsv_vec, result);
 
-        if (img.channels() == 3)
-            result = slic.GetImgWithContours(cv::Scalar(10, 0, 255));
-        else
-            result = slic.GetImgWithContours(cv::Scalar(128));
-        //*/
+        // BACKGROUND
+        cvtColor(result, result, COLOR_HSV2BGR);
+        cvtColor(result, result2, COLOR_BGR2GRAY);
 
-        /*
-        cvtColor(res, res, COLOR_RGB2GRAY);
-        vector<vector<Point> > contours;
-        vector<Vec4i> hierarchy;
-        Canny( res, canny_output, 100, 100*2 );
+        threshold(result2, result2, 20, 255, THRESH_BINARY_INV);
+        bitwise_and(img, img, background, result2);
+        cvtColor(background, background, cv::COLOR_HSV2BGR); // or rgb
 
-        findContours( canny_output, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE );
+        final_image = result + background;
 
-        int morph_size = 5;
-        Mat element = getStructuringElement(MORPH_RECT, Size(2 * morph_size + 1,2 * morph_size + 1), Point(morph_size, morph_size));
+        // cvtColor(final_image, final_image_gray, COLOR_BGR2GRAY);
+        // equalizeHist(final_image_gray, equalized);
+        // cvtColor(final_image_gray, equalized, COLOR_GRAY2BGR);
 
-        dilate(canny_output, canny_output, element, Point(-1, -1), 1);
-
-        std::sort(contours.begin(), contours.end(), [](const vector<Point>& c1, const vector<Point>& c2){return contourArea(c1, false) < contourArea(c2, false);});
-
-        Mat drawing = Mat::zeros( canny_output.size(), CV_8UC3 );
-        drawContours( drawing, contours, -1, Scalar(0, 255, 0), 10, LINE_8, hierarchy, 0 );
-        */
-
-        // cvtColor(HSVImage, finalImage, cv::COLOR_HSV2BGR);
-        // platform_log("Output Path: %s", outputPath);
-        imwrite(outputPath, img);
-        // platform_log("Image writed again ");
+        // RETURNING
+        platform_log("Output Path: %s", outputPath);
+        imwrite(outputPath, final_image); // then compare withy img
+        platform_log("Image writed again ");
     }
 
     __attribute__((visibility("default"))) __attribute__((used)) void water_shed(char *inputImagePath, char *outputPath, char *inputXorImagePath)

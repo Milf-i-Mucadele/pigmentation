@@ -1,3 +1,8 @@
 ninja: Entering directory `C:\Users\sbura\development\platinpower_2\pigmentation\android\app\.cxx\cmake\debug\x86'
-[1/2] Building CXX object CMakeFiles/my_functions.dir/C_/Users/sbura/development/platinpower_2/pigmentation/open_cv/my_functions.cpp.o
-[2/2] Linking CXX shared library C:\Users\sbura\development\platinpower_2\pigmentation\build\app\intermediates\cmake\debug\obj\x86\libmy_functions.so
+[1/3] Building CXX object CMakeFiles/my_functions.dir/C_/Users/sbura/development/platinpower_2/pigmentation/open_cv/my_functions.cpp.o
+[2/3] Building CXX object CMakeFiles/my_functions.dir/C_/Users/sbura/development/platinpower_2/pigmentation/open_cv/slic.cpp.o
+C:/Users/sbura/development/platinpower_2/pigmentation/open_cv/slic.cpp:1100:1: warning: non-void function does not return a value in all control paths [-Wreturn-type]
+}
+^
+1 warning generated.
+[3/3] Linking CXX shared library C:\Users\sbura\development\platinpower_2\pigmentation\build\app\intermediates\cmake\debug\obj\x86\libmy_functions.so
