@@ -168,12 +168,12 @@ extern "C"
         Point maxLoc;
         minMaxLoc(s, &minVal, &maxVal, &minLoc, &maxLoc);
 
-        h.setTo(21, v > 1);
+        h.setTo(30, v > 1);
         // s = 62;
-        // s.setTo(62, v > 1);
+        // s.setTo(142, v > 1);
         s = s / maxVal;
-        s = s + 0.1;
-        s = s * 155;
+        s = s + 0.2;
+        s = s * 178;
         v = v + 20;
         merge(hsv_vec, result);
 
