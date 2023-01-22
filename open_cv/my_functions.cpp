@@ -2,9 +2,16 @@
 #include <chrono>
 #include "slic.h"
 #include <fstream>
+#include <opencv2/imgproc.hpp>
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <opencv2/imgcodecs.hpp>
+#include <utility>
+#include <vector>
+#include <regex>
 
 #ifdef __ANDROID__
-
 #include <android/log.h>
 
 #endif
@@ -95,7 +102,7 @@ extern "C"
         Scalar color = Scalar(255, 255, 255);
         Scalar line_Color(0, 255, 0);
 
-        Point p1(350, 520); // todo: this will be read fromn txt file 350,520 for kapi
+        Point p1(730, 575); // todo: this will be read fromn txt file 350,520 for kapi
 
         // FIND THE RELEVANT CONTOUR
         for (size_t i = 0; i < contours.size(); i++)
@@ -146,10 +153,6 @@ extern "C"
         cvtColor(background, background, cv::COLOR_HSV2BGR); // or rgb
 
         final_image = result + background;
-
-        // cvtColor(final_image, final_image_gray, COLOR_BGR2GRAY);
-        // equalizeHist(final_image_gray, equalized);
-        // cvtColor(final_image_gray, equalized, COLOR_GRAY2BGR);
 
         // RETURNING
         platform_log("Output Path: %s", outputPath);

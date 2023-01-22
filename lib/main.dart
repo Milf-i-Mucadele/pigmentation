@@ -165,8 +165,12 @@ class _MyHomePageState extends State<MyHomePage> {
           MaterialButton(
             color: Colors.black,
             onPressed: _onConvertClick_water_shed,
-            child: Text("Convert Gray Image",
-                style: TextStyle(color: Colors.white)),
+            child: Text("Watershed", style: TextStyle(color: Colors.white)),
+          ),
+          MaterialButton(
+            color: Colors.black,
+            onPressed: _onConvertClick,
+            child: Text("Slic", style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
