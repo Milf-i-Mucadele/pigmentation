@@ -1,22 +1,22 @@
-                Executable : C:\Users\sbura\AppData\Local\Android\sdk\cmake\3.10.2.4988404\bin\cmake.exe
+                Executable : C:\Users\Onat\AppData\Local\Android\Sdk\cmake\3.10.2.4988404\bin\cmake.exe
 arguments : 
--HC:\Users\sbura\development\platinpower_2\pigmentation\android\app
+-HC:\pigmentation\android\app
 -DCMAKE_CXX_FLAGS=-frtti -fexceptions -std=c++11
--DCMAKE_FIND_ROOT_PATH=C:\Users\sbura\development\platinpower_2\pigmentation\android\app\.cxx\cmake\debug\prefab\arm64-v8a\prefab
+-DCMAKE_FIND_ROOT_PATH=C:\pigmentation\android\app\.cxx\cmake\debug\prefab\arm64-v8a\prefab
 -DCMAKE_BUILD_TYPE=Debug
--DCMAKE_TOOLCHAIN_FILE=C:\Users\sbura\AppData\Local\Android\sdk\ndk\23.0.7599858\build\cmake\android.toolchain.cmake
+-DCMAKE_TOOLCHAIN_FILE=C:\Users\Onat\AppData\Local\Android\Sdk\ndk\23.0.7599858\build\cmake\android.toolchain.cmake
 -DANDROID_ABI=arm64-v8a
--DANDROID_NDK=C:\Users\sbura\AppData\Local\Android\sdk\ndk\23.0.7599858
+-DANDROID_NDK=C:\Users\Onat\AppData\Local\Android\Sdk\ndk\23.0.7599858
 -DANDROID_PLATFORM=android-16
 -DCMAKE_ANDROID_ARCH_ABI=arm64-v8a
--DCMAKE_ANDROID_NDK=C:\Users\sbura\AppData\Local\Android\sdk\ndk\23.0.7599858
+-DCMAKE_ANDROID_NDK=C:\Users\Onat\AppData\Local\Android\Sdk\ndk\23.0.7599858
 -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
--DCMAKE_LIBRARY_OUTPUT_DIRECTORY=C:\Users\sbura\development\platinpower_2\pigmentation\build\app\intermediates\cmake\debug\obj\arm64-v8a
--DCMAKE_MAKE_PROGRAM=C:\Users\sbura\AppData\Local\Android\sdk\cmake\3.10.2.4988404\bin\ninja.exe
+-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=C:\pigmentation\build\app\intermediates\cmake\debug\obj\arm64-v8a
+-DCMAKE_MAKE_PROGRAM=C:\Users\Onat\AppData\Local\Android\Sdk\cmake\3.10.2.4988404\bin\ninja.exe
 -DCMAKE_SYSTEM_NAME=Android
 -DCMAKE_SYSTEM_VERSION=16
 -DANDROID_STL=c++_shared
--BC:\Users\sbura\development\platinpower_2\pigmentation\android\app\.cxx\cmake\debug\arm64-v8a
+-BC:\pigmentation\android\app\.cxx\cmake\debug\arm64-v8a
 -GNinja
 jvmArgs : 
 

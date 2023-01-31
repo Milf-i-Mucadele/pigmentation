@@ -52,7 +52,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if (image == null) return;
 
     setState(() => this.imagePath = image.path);
-    /*
+
     img_lib.Image? image_resized =
         img_lib.decodeImage(new File(this.imagePath!).readAsBytesSync());
 
@@ -62,7 +62,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // Save the thumbnail as a PNG.
     new File(this.imagePath!)..writeAsBytesSync(img_lib.encodePng(thumbnail));
-    */
   }
 
   void _onConvertClick() async {
@@ -89,18 +88,16 @@ class _MyHomePageState extends State<MyHomePage> {
       if (image == null) return;
 
       setState(() => this.xor_imagePath = image.path);
-      /*
+
       img_lib.Image? image_resized =
           img_lib.decodeImage(new File(this.xor_imagePath!).readAsBytesSync());
-
       // Resize the image to a 120x? thumbnail (maintaining the aspect ratio).
       img_lib.Image thumbnail =
           img_lib.copyResize(image_resized!, width: 800, height: 597);
-
       // Save the thumbnail as a PNG.
       new File(this.xor_imagePath!)
         ..writeAsBytesSync(img_lib.encodePng(thumbnail));
-      */
+
       List<String> outputPath = imagePath!.split(".");
       outputPath[outputPath.length - 2] =
           "${outputPath[outputPath.length - 2]}_gray";

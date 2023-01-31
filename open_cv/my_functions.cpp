@@ -10,6 +10,7 @@
 #include <utility>
 #include <vector>
 #include <regex>
+#include <cstdio>
 
 #ifdef __ANDROID__
 #include <android/log.h>
@@ -163,144 +164,126 @@ extern "C"
     __attribute__((visibility("default"))) __attribute__((used)) void water_shed(char *inputImagePath, char *outputPath, char *inputXorImagePath)
     {
         platform_log("***WATERSHED***");
-        cv::Mat img0 = cv::imread(inputImagePath), xor_image, result, result_2, final_image;
+        cv::Mat img0 = cv::imread(inputImagePath), imgGray,final_image,xor_image,xor_image_copy,temp,temp2,result,result_2,result_grey;
         cv::Mat img_xor = cv::imread(inputXorImagePath);
-        platform_log("%d,%d", img0.rows, img0.cols);
-        platform_log("%d,%d", img_xor.rows, img_xor.cols);
+        
+        platform_log("%d,%d",img0.rows, img0.cols);
+        platform_log("%d,%d",img_xor.rows, img_xor.cols);
 
         platform_log(inputImagePath);
         platform_log(outputPath);
         platform_log(inputXorImagePath);
 
-        bitwise_xor(img0, img_xor, xor_image);
-        cvtColor(xor_image, xor_image, COLOR_BGR2GRAY);
-        threshold(xor_image, xor_image, 0, 255, THRESH_BINARY);
-        cv::Mat element_ = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
-        // erode( wshed, wshed, element );
-        // imshow( "erode", wshed );
-        dilate(xor_image, xor_image, element_);
-        erode(xor_image, xor_image, element_);
-        erode(xor_image, xor_image, element_);
-        erode(xor_image, xor_image, element_);
-        erode(xor_image, xor_image, element_);
-        // imwrite(outputPath, xor_image);
-        // cout << xor_image;
-        int i, j, mini = 999, minj = 999, maxi = -10, maxj = -10, compCount = 0;
-        // imshow("1",xor_image);
-        for (i = 0; i < xor_image.rows; i++)
-            for (j = 0; j < xor_image.cols; j++)
-            {
-                // cout << xor_image.at<uchar>(i,j);
-                if (xor_image.at<uchar>(i, j) == 255)
+
+            int offset = 50;
+            int i, j, compCount = 0;
+            vector<vector<Point>> contours_xor,contours_rect, contours;
+            vector<Vec4i> hierarchy;
+
+            bitwise_xor(img0, img_xor, xor_image);
+            cvtColor(xor_image, xor_image, COLOR_BGR2GRAY);
+            threshold(xor_image, xor_image, 0, 255, THRESH_BINARY);
+            cv::Mat element_ = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
+            erode( xor_image, xor_image, element_ );
+            erode( xor_image, xor_image, element_ );
+            //erode( xor_image, xor_image, element_ );
+            //erode( xor_image, xor_image, element_ );
+
+            xor_image.copyTo(xor_image_copy);
+
+            findContours(xor_image_copy, contours_xor, RETR_TREE, CHAIN_APPROX_SIMPLE);
+            cvtColor(xor_image_copy, xor_image_copy, COLOR_GRAY2BGR);
+
+            for (auto cnt : contours_xor) {
+                cv::Rect rect = cv::boundingRect(cnt);
+                rect.width = (int) (rect.width + offset*2);
+                rect.height = (int) (rect.height + offset*2);
+                rect.x = (int) (rect.x - offset);
+                rect.y = (int) (rect.y - offset);
+                cv::rectangle(xor_image_copy, rect, cv::Scalar(255, 255, 255), -1);
+            }
+            
+            cvtColor(xor_image_copy, xor_image_copy, COLOR_BGR2GRAY);
+            findContours(xor_image_copy, contours_rect, RETR_TREE, CHAIN_APPROX_SIMPLE);
+            
+            for (auto cnt : contours_rect) {
+                cv::Rect rect = cv::boundingRect(cnt);
+
+                Mat temp(xor_image_copy.size(), CV_8UC3,(0,0,0));
+                Mat temp2(xor_image_copy.size(), CV_8UC3,(0,0,0));
+                cv::rectangle(temp, rect, cv::Scalar(255, 255, 255), -1);
+
+                cvtColor(temp, temp, COLOR_BGR2GRAY);
+                bitwise_and(xor_image, xor_image, temp2, temp);
+                cv::rectangle(temp2, rect, cv::Scalar(255, 255, 255), 3);
+
+                findContours(temp2, contours, hierarchy, RETR_CCOMP, CHAIN_APPROX_SIMPLE);
+                if( contours.empty() )
+                    continue;
+                Mat markers(xor_image.size(), CV_32S);
+                markers = Scalar::all(0);
+                int idx = 0;
+                for( ; idx >= 0; idx = hierarchy[idx][0], compCount++ )
+                    drawContours(markers, contours, idx, Scalar::all(compCount+1), -1, 8, hierarchy, INT_MAX);
+                if( compCount == 0 )
+                    continue;
+                vector<Vec3b> colorTab;
+                for( i = 0; i < compCount; i++ )
                 {
-                    if (i < mini)
-                        mini = i;
-                    if (i > maxi)
-                        maxi = i;
-                    if (j < minj)
-                        minj = j;
-                    if (j > maxj)
-                        maxj = j;
+                    int b = i*20;
+                    int g = i*20;
+                    int r = i*20;
+                    colorTab.push_back(Vec3b(b,g,r));
                 }
+                watershed( img0, markers );
+
+                Mat wshed(markers.size(), CV_8UC3);
+                for( i = 0; i < markers.rows; i++ )
+                    for( j = 0; j < markers.cols; j++ )
+                    {
+                        int index = markers.at<int>(i,j);
+                        if( index == -1 )
+                            wshed.at<Vec3b>(i,j) = Vec3b(255,255,255);
+                        else if( index <= 0 || index > compCount )
+                            wshed.at<Vec3b>(i,j) = Vec3b(0,0,0);
+                        else
+                            wshed.at<Vec3b>(i,j) = colorTab[index - 1];
+                    }
+
+                cvtColor(wshed, wshed, COLOR_BGR2GRAY);
+                threshold(wshed, wshed, (compCount-2)*20, 255, THRESH_BINARY_INV);
+
+                cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
+                dilate( wshed, wshed, element );
+                bitwise_and(img0, img0, result, wshed);
+                cvtColor(result, result, COLOR_BGR2HSV);
+                
+                vector<Mat> hsv_vec;
+                split(result, hsv_vec);
+
+                cv::Mat& h = hsv_vec[0];
+                cv::Mat& s = hsv_vec[1];
+                cv::Mat& v = hsv_vec[2];
+        
+                h.setTo(110, v > 1);
+                //Mat mask1 = (s > 50);
+                //Mat mask2 = (v > 50);
+                //Mat final_mask = mask1 & mask2;
+
+                s.setTo(130, v>1);
+                
+                merge(hsv_vec, result);
+                cvtColor(result, result, COLOR_HSV2BGR);
+
             }
-        cvtColor(xor_image, xor_image, COLOR_GRAY2BGR);
-        platform_log("%d,%d,%d,%d", mini, minj, maxi, maxj);
-        // Top Left Corner
-        Point p1(minj - 50, mini - 50);
+            cvtColor(result, result_grey, COLOR_BGR2GRAY);
 
-        // Bottom Right Corner
-        Point p2(maxj + 50, maxi + 50);
-        // Point center(minj, mini);//Declaring the center point
-        // circle(xor_image, center,10, Scalar(0,255,0), 3);//Using circle()function to draw the line//
-        // Point center2(maxj, maxi);//Declaring the center point
-        // circle(xor_image, center2,10, Scalar(0,255,0), 3);//Using circle()function to draw the line//
-        rectangle(xor_image, p1, p2, Scalar(255, 255, 255), 2);
+            threshold(result_grey, result_grey, 0, 255, THRESH_BINARY_INV);
 
-        // cout << mini << endl;
-        // cout << maxi << endl;
-        // cout << minj << endl;
-        // cout << maxj << endl;
-        cvtColor(xor_image, xor_image, COLOR_BGR2GRAY);
-        // imshow("2",xor_image);
-        vector<vector<Point>> contours;
-        vector<Vec4i> hierarchy;
-        findContours(xor_image, contours, hierarchy, RETR_CCOMP, CHAIN_APPROX_SIMPLE);
+            bitwise_and(img0, img0, result_2, result_grey);
 
-        Mat markers(xor_image.size(), CV_32S);
-        markers = Scalar::all(0);
-        int idx = 0;
-        for (; idx >= 0; idx = hierarchy[idx][0], compCount++)
-            drawContours(markers, contours, idx, Scalar::all(compCount + 1), -1, 8, hierarchy, INT_MAX);
-
-        vector<Vec3b> colorTab;
-        for (i = 0; i < compCount; i++)
-        {
-            int b = i * 20;
-            int g = i * 20;
-            int r = i * 20;
-            colorTab.push_back(Vec3b(b, g, r));
-        }
-        watershed(img0, markers);
-
-        Mat wshed(markers.size(), CV_8UC3);
-        // paint the watershed image
-        for (i = 0; i < markers.rows; i++)
-            for (j = 0; j < markers.cols; j++)
-            {
-                int index = markers.at<int>(i, j);
-                // platform_log("%d",index);
-                if (index == -1)
-                    wshed.at<cv::Vec3b>(i, j) = cv::Vec3b(255, 255, 255);
-                else if (index <= 0 || index > compCount)
-                    wshed.at<cv::Vec3b>(i, j) = cv::Vec3b(0, 0, 0);
-                else
-                    wshed.at<cv::Vec3b>(i, j) = colorTab[index - 1];
-            }
-        // wshed = wshed*0.5 + imgGray*0.5;
-        // imshow( "watershed1", wshed );
-        cvtColor(wshed, wshed, COLOR_BGR2GRAY);
-        // cout << compCount;
-        threshold(wshed, wshed, (compCount - 2) * 20, 255, THRESH_BINARY_INV);
-        // bitwise_and(img0, img0, result, wshed);
-        // imshow( "watershed2", wshed );
-        cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
-        // erode( wshed, wshed, element );
-        // imshow( "erode", wshed );
-        dilate(wshed, wshed, element);
-        // imshow( "dilate", wshed );
-        bitwise_and(img0, img0, result, wshed);
-        // cout << wshed;
-        // threshold(wshed, wshed, 0, 255, THRESH_BINARY);
-
-        cvtColor(result, result, COLOR_BGR2HSV);
-
-        vector<Mat> hsv_vec;
-        split(result, hsv_vec); // this is an opencv function
-
-        cv::Mat &h = hsv_vec[0];
-        cv::Mat &s = hsv_vec[1];
-        cv::Mat &v = hsv_vec[2];
-        h.setTo(21, v > 1);
-        // s = 62;
-        // s.setTo(62, v > 1);
-        double minVal;
-        double maxVal;
-        Point minLoc;
-        Point maxLoc;
-
-        minMaxLoc(s, &minVal, &maxVal, &minLoc, &maxLoc);
-        s = s / maxVal;
-        s = s + 0.1;
-        s = s * 155;
-        v = v + 20;
-        merge(hsv_vec, result);
-        cvtColor(result, result, COLOR_HSV2BGR);
-        // imshow( "result", result );
-        threshold(wshed, wshed, 0, 255, THRESH_BINARY_INV);
-        // imshow( "watershed 1", wshed);
-        bitwise_and(img0, img0, result_2, wshed);
-
-        final_image = result + result_2;
-        imwrite(outputPath, img_xor);
+            final_image = result + result_2;
+            
+        imwrite(outputPath, final_image);
     }
 }
