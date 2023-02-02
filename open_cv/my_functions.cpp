@@ -11,6 +11,7 @@
 #include <vector>
 #include <regex>
 #include <cstdio>
+#include <cstdlib>
 
 #ifdef __ANDROID__
 #include <android/log.h>
@@ -58,13 +59,26 @@ extern "C"
         return coordinates;
     }
 
-    __attribute__((visibility("default"))) __attribute__((used)) void convertImageToGrayImage(char *inputImagePath, char *outputPath)
+    __attribute__((visibility("default"))) __attribute__((used)) void convertImageToGrayImage(char *inputImagePath, char *outputPath, char *tappoint, char *colorhex)
+
     {
         // THE DIMENSIONS OF THE IMAGE
         platform_log("PATH %s: ", inputImagePath);
+        platform_log("Tappoint %s", tappoint);
+        platform_log("colorhex %s", colorhex);
+        vector<std::pair<int, int>> coordinates = parse_coordinates(tappoint);
+
+        platform_log("coordinates: %d , %d", coordinates[0].first, coordinates[0].second);
+        Point p1(coordinates[0].second, coordinates[0].first); // todo: this will be read fromn txt file 350,520 for kapi
+
+        int r, g, b;
+        std::sscanf(colorhex, "#%02x%02x%02x", &r, &g, &b);
+
+        platform_log("r,g,b: %d,%d,%d", r, g, b);
+
         cv::Mat img = cv::imread(inputImagePath);
-        platform_log("Length row: %d", img.rows);
-        platform_log("Length column: %d", img.cols);
+        platform_log("Length row: %i", img.rows);
+        platform_log("Length column: %i", img.cols);
 
         // BGR -> HSV changing part
         cv::Mat HSVImage;
@@ -75,8 +89,15 @@ extern "C"
 
         // COLOR SEGMENTATION
         cv::Mat hsv = HSVImage.clone();
-        int hue = 16;     //-15+15 for door
-        int min_sat = 30; //-40
+
+        cv::Vec3b pixel = hsv.at<cv::Vec3b>(coordinates[0].second, coordinates[0].first);
+        int hue = pixel[0];
+        int min_sat = pixel[1];
+
+        platform_log("tappoint hue, sat : %d,%d", hue, min_sat);
+
+        // int hue = 16;     //-15+15 for door
+        // int min_sat = 30; //-40
         // int hue = 16;
         // int min_sat = 150;
 
@@ -102,8 +123,6 @@ extern "C"
         int poi_cnt;
         Scalar color = Scalar(255, 255, 255);
         Scalar line_Color(0, 255, 0);
-
-        Point p1(730, 575); // todo: this will be read fromn txt file 350,520 for kapi
 
         // FIND THE RELEVANT CONTOUR
         for (size_t i = 0; i < contours.size(); i++)
