@@ -69,12 +69,20 @@ extern "C"
         vector<std::pair<int, int>> coordinates = parse_coordinates(tappoint);
 
         platform_log("coordinates: %d , %d", coordinates[0].first, coordinates[0].second);
-        Point p1(coordinates[0].second, coordinates[0].first); // todo: this will be read fromn txt file 350,520 for kapi
+        Point p1(coordinates[0].first, coordinates[0].second); // todo: this will be read fromn txt file 350,520 for kapi change here
 
         int r, g, b;
         std::sscanf(colorhex, "#%02x%02x%02x", &r, &g, &b);
 
         platform_log("r,g,b: %d,%d,%d", r, g, b);
+
+        cv::Mat src = cv::Mat(1, 1, CV_8UC3, cv::Scalar(r, g, b));
+        cv::Mat desired;
+        cv::cvtColor(src, desired, cv::COLOR_RGB2HSV);
+        int desired_h = desired.at<cv::Vec3b>(0, 0)[0];
+        int desired_s = desired.at<cv::Vec3b>(0, 0)[1];
+        int desired_v = desired.at<cv::Vec3b>(0, 0)[2];
+        platform_log("the desried H S V color : %d,%d,%d", desired_h, desired_s, desired_v);
 
         cv::Mat img = cv::imread(inputImagePath);
         platform_log("Length row: %i", img.rows);
@@ -101,7 +109,7 @@ extern "C"
         // int hue = 16;
         // int min_sat = 150;
 
-        cv::Scalar minHSV = cv::Scalar(hue - 16, min_sat - 40, 20); // bed
+        cv::Scalar minHSV = cv::Scalar(hue - 16, min_sat - 60, 20); // bed
         cv::Scalar maxHSV = cv::Scalar(hue + 16, 255, 240);         // bed was +30
 
         cv::Mat maskHSV, resultHSV;
@@ -155,12 +163,12 @@ extern "C"
         Point maxLoc;
         minMaxLoc(s, &minVal, &maxVal, &minLoc, &maxLoc);
 
-        h.setTo(30, v > 1);
+        h.setTo(desired_h, v > 1);
         // s = 62;
         // s.setTo(142, v > 1);
         s = s / maxVal;
-        s = s + 0.2;
-        s = s * 178;
+        // s = s+0.2;
+        s = s * desired_s;
         v = v + 20;
         merge(hsv_vec, result);
 
