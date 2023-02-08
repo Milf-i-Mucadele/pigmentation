@@ -71,7 +71,8 @@ class _MyHomePageState extends State<MyHomePage> {
           "${outputPath[outputPath.length - 2]}_gray";
       print(outputPath.join("."));
       Stopwatch stopwatch = new Stopwatch()..start();
-      convertImageToGrayImage(imagePath!, outputPath.join("."));
+      convertImageToGrayImage(
+          imagePath!, outputPath.join("."), '(150,200)', '#0095ff');
       print('Image convert executed in ${stopwatch.elapsed}');
       processMillisecond = stopwatch.elapsedMilliseconds;
       stopwatch.stop();
@@ -103,7 +104,7 @@ class _MyHomePageState extends State<MyHomePage> {
           "${outputPath[outputPath.length - 2]}_gray";
       print(outputPath.join("."));
       Stopwatch stopwatch = new Stopwatch()..start();
-      water_shed(imagePath!, outputPath.join("."), xor_imagePath!);
+      water_shed(imagePath!, outputPath.join("."), xor_imagePath!, '#0095ff');
       print('Image convert executed in ${stopwatch.elapsed}');
       processMillisecond = stopwatch.elapsedMilliseconds;
       stopwatch.stop();
