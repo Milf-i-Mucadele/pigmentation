@@ -119,7 +119,13 @@ extern "C"
         platform_log("tappoint hue, sat ,value: %d,%d,%d", hue, min_sat, value);
 
         int black;
-        cv::Scalar minHSV, maxHSV;
+        int ultra_black = 0;
+        cv::Scalar minHSV,
+            maxHSV;
+        if (value < 80 && min_sat < 80)
+        {
+            ultra_black = 1;
+        }
 
         if (value < 80)
         { // black image
@@ -142,8 +148,8 @@ extern "C"
         {
             black = 0;
 
-            minHSV = cv::Scalar(low_hue, min_sat - 60, 20); // bed
-            maxHSV = cv::Scalar(high_hue, 255, 240);        // bed was +30
+            minHSV = cv::Scalar(low_hue, min_sat - 60, 0); // bed
+            maxHSV = cv::Scalar(high_hue, 255, 255);       // bed was +30
             platform_log("Normal Image DONE");
         }
 
@@ -200,7 +206,25 @@ extern "C"
         Point maxLoc;
         minMaxLoc(s, &minVal, &maxVal, &minLoc, &maxLoc);
 
-        if (black)
+        if (ultra_black)
+
+        {
+            platform_log("ultra Blakc pigmentation");
+            h.setTo(desired_h);
+            s.setTo(desired_s);
+            // Increase the lightness for pixels that are not black
+            for (int i = 0; i < v.rows; i++)
+            {
+                for (int j = 0; j < v.cols; j++)
+                {
+                    if (result.at<cv::Vec3b>(i, j) != cv::Vec3b(0, 0, 0))
+                    {
+                        v.at<uchar>(i, j) = v.at<uchar>(i, j) + 150;
+                    }
+                }
+            }
+        }
+        else if (black)
         {
             platform_log("Blakc pigmentation");
             h.setTo(desired_h);
@@ -212,7 +236,7 @@ extern "C"
                 {
                     if (result.at<cv::Vec3b>(i, j) != cv::Vec3b(0, 0, 0))
                     {
-                        v.at<uchar>(i, j) = v.at<uchar>(i, j) + 150;
+                        v.at<uchar>(i, j) = v.at<uchar>(i, j) + 60;
                     }
                 }
             }

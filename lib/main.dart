@@ -72,7 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
       print(outputPath.join("."));
       Stopwatch stopwatch = new Stopwatch()..start();
       convertImageToGrayImage(
-          imagePath!, outputPath.join("."), '(700,250)', '#3f5344');
+          imagePath!, outputPath.join("."), '(400,300)', '#e3e3e3'); //700/250
       print('Image convert executed in ${stopwatch.elapsed}');
       processMillisecond = stopwatch.elapsedMilliseconds;
       stopwatch.stop();
