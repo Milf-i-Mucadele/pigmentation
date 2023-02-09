@@ -1,12 +1,12 @@
 ninja: Entering directory `C:\Users\sbura\development\platinpower_2\pigmentation\android\app\.cxx\cmake\debug\x86'
 [1/2] Building CXX object CMakeFiles/my_functions.dir/C_/Users/sbura/development/platinpower_2/pigmentation/open_cv/my_functions.cpp.o
-C:/Users/sbura/development/platinpower_2/pigmentation/open_cv/my_functions.cpp:48:5: warning: 'parse_coordinates' has C-linkage specified, but returns user-defined type 'vector<std::pair<int, int>>' which is incompatible with C [-Wreturn-type-c-linkage]
+C:/Users/sbura/development/platinpower_2/pigmentation/open_cv/my_functions.cpp:41:5: warning: 'parse_coordinates' has C-linkage specified, but returns user-defined type 'vector<std::pair<int, int>>' which is incompatible with C [-Wreturn-type-c-linkage]
     parse_coordinates(const std::string &str)
     ^
-C:/Users/sbura/development/platinpower_2/pigmentation/open_cv/my_functions.cpp:240:55: warning: expression result unused [-Wunused-value]
+C:/Users/sbura/development/platinpower_2/pigmentation/open_cv/my_functions.cpp:301:55: warning: expression result unused [-Wunused-value]
             Mat temp(xor_image_copy.size(), CV_8UC3, (0, 0, 0));
                                                       ^
-C:/Users/sbura/development/platinpower_2/pigmentation/open_cv/my_functions.cpp:241:56: warning: expression result unused [-Wunused-value]
+C:/Users/sbura/development/platinpower_2/pigmentation/open_cv/my_functions.cpp:302:56: warning: expression result unused [-Wunused-value]
             Mat temp2(xor_image_copy.size(), CV_8UC3, (0, 0, 0));
                                                        ^
 3 warnings generated.

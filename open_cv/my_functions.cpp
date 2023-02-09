@@ -37,13 +37,6 @@ extern "C"
     }
 
     __attribute__((visibility("default"))) __attribute__((used))
-    const char *
-    getOpenCVVersion()
-    {
-        return CV_VERSION;
-    }
-
-    __attribute__((visibility("default"))) __attribute__((used))
     vector<std::pair<int, int>>
     parse_coordinates(const std::string &str)
     {
@@ -59,6 +52,13 @@ extern "C"
         return coordinates;
     }
 
+    __attribute__((visibility("default"))) __attribute__((used))
+    const char *
+    getOpenCVVersion()
+    {
+        return CV_VERSION;
+    }
+
     __attribute__((visibility("default"))) __attribute__((used)) void convertImageToGrayImage(char *inputImagePath, char *outputPath, char *tappoint, char *colorhex)
 
     {
@@ -68,6 +68,7 @@ extern "C"
         platform_log("colorhex %s", colorhex);
         vector<std::pair<int, int>> coordinates = parse_coordinates(tappoint);
 
+        // FINDING THE DESIRED HSV COLOR CODE
         platform_log("coordinates: %d , %d", coordinates[0].first, coordinates[0].second);
         Point p1(coordinates[0].first, coordinates[0].second); // todo: this will be read fromn txt file 350,520 for kapi change here
 
@@ -82,8 +83,9 @@ extern "C"
         int desired_h = desired.at<cv::Vec3b>(0, 0)[0];
         int desired_s = desired.at<cv::Vec3b>(0, 0)[1];
         int desired_v = desired.at<cv::Vec3b>(0, 0)[2];
-        platform_log("the desried H S V color : %d,%d,%d", desired_h, desired_s, desired_v);
+        platform_log("the desired H S V color : %d,%d,%d", desired_h, desired_s, desired_v);
 
+        // DIMENSIONS OF INPUT IMAGE
         cv::Mat img = cv::imread(inputImagePath);
         platform_log("Length row: %i", img.rows);
         platform_log("Length column: %i", img.cols);
@@ -101,16 +103,51 @@ extern "C"
         cv::Vec3b pixel = hsv.at<cv::Vec3b>(coordinates[0].second, coordinates[0].first);
         int hue = pixel[0];
         int min_sat = pixel[1];
+        int value = pixel[2];
 
-        platform_log("tappoint hue, sat : %d,%d", hue, min_sat);
+        int high_hue = std::max((hue - 20) % 180, (hue + 20) % 180);
+        int low_hue = std::min((hue - 20) % 180, (hue - 20) % 180);
+        if (high_hue == low_hue)
+        {
+            high_hue = 180;
+        }
 
-        // int hue = 16;     //-15+15 for door
-        // int min_sat = 30; //-40
-        // int hue = 16;
-        // int min_sat = 150;
+        if (low_hue < 0)
+        {
+            low_hue = 0;
+        }
+        platform_log("tappoint hue, sat ,value: %d,%d,%d", hue, min_sat, value);
 
-        cv::Scalar minHSV = cv::Scalar(hue - 16, min_sat - 60, 20); // bed
-        cv::Scalar maxHSV = cv::Scalar(hue + 16, 255, 240);         // bed was +30
+        int black;
+        cv::Scalar minHSV, maxHSV;
+
+        if (value < 80)
+        { // black image
+
+            black = 1;
+
+            minHSV = cv::Scalar(0, min_sat - 60, value - 40); // bed
+            maxHSV = cv::Scalar(180, 255, value + 40);        // bed was +30
+            platform_log("value <40 DONE");
+        }
+
+        else if (min_sat < 80)
+        {
+            black = 0;
+            minHSV = cv::Scalar(0, min_sat - 60, value - 40); // bed
+            maxHSV = cv::Scalar(180, 255, value + 40);        // bed was +30
+            platform_log("min_sat <40 DONE");
+        }
+        else
+        {
+            black = 0;
+
+            minHSV = cv::Scalar(low_hue, min_sat - 60, 20); // bed
+            maxHSV = cv::Scalar(high_hue, 255, 240);        // bed was +30
+            platform_log("Normal Image DONE");
+        }
+
+        platform_log("min_heu, max_hsv : %d,%d", low_hue, high_hue);
 
         cv::Mat maskHSV, resultHSV;
         cv::inRange(hsv, minHSV, maxHSV, maskHSV);
@@ -163,13 +200,36 @@ extern "C"
         Point maxLoc;
         minMaxLoc(s, &minVal, &maxVal, &minLoc, &maxLoc);
 
-        h.setTo(desired_h, v > 1);
-        // s = 62;
-        // s.setTo(142, v > 1);
-        s = s / maxVal;
-        // s = s+0.2;
-        s = s * desired_s;
-        v = v + 20;
+        if (black)
+        {
+            platform_log("Blakc pigmentation");
+            h.setTo(desired_h);
+            s.setTo(desired_s);
+            // Increase the lightness for pixels that are not black
+            for (int i = 0; i < v.rows; i++)
+            {
+                for (int j = 0; j < v.cols; j++)
+                {
+                    if (result.at<cv::Vec3b>(i, j) != cv::Vec3b(0, 0, 0))
+                    {
+                        v.at<uchar>(i, j) = v.at<uchar>(i, j) + 150;
+                    }
+                }
+            }
+        }
+        else
+        {
+            h.setTo(desired_h);
+            s.setTo(desired_s);
+        }
+
+        // h.setTo(desired_h, v > 1);
+        // // s = 62;
+        // // s.setTo(142, v > 1);
+        // s = s / maxVal;
+        // // s = s+0.2;
+        // s = s * desired_s;
+        // v = v + 20;
         merge(hsv_vec, result);
 
         // BACKGROUND
@@ -184,6 +244,7 @@ extern "C"
 
         // RETURNING
         platform_log("Output Path: %s", outputPath);
+        cvtColor(segmented_img, segmented_img, COLOR_HSV2BGR);
         imwrite(outputPath, final_image); // then compare withy img
         platform_log("Image writed again ");
     }
