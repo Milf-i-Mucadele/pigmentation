@@ -1,2 +1,13 @@
 ninja: Entering directory `C:\pigmentation\android\app\.cxx\cmake\debug\arm64-v8a'
-ninja: no work to do.
+[1/2] Building CXX object CMakeFiles/my_functions.dir/C_/pigmentation/open_cv/my_functions.cpp.o
+C:/pigmentation/open_cv/my_functions.cpp:48:5: warning: 'parse_coordinates' has C-linkage specified, but returns user-defined type 'vector<std::pair<int, int>>' which is incompatible with C [-Wreturn-type-c-linkage]
+    parse_coordinates(const std::string &str)
+    ^
+C:/pigmentation/open_cv/my_functions.cpp:447:58: warning: expression result unused [-Wunused-value]
+                Mat temp(xor_image_copy.size(), CV_8UC3,(0,0,0));
+                                                         ^
+C:/pigmentation/open_cv/my_functions.cpp:448:59: warning: expression result unused [-Wunused-value]
+                Mat temp2(xor_image_copy.size(), CV_8UC3,(0,0,0));
+                                                          ^
+3 warnings generated.
+[2/2] Linking CXX shared library C:\pigmentation\build\app\intermediates\cmake\debug\obj\arm64-v8a\libmy_functions.so

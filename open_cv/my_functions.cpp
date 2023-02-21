@@ -62,6 +62,7 @@ extern "C"
     __attribute__((visibility("default"))) __attribute__((used)) void convertImageToGrayImage(char *inputImagePath, char *outputPath, char *tappoint, char *colorhex)
 
     {
+        try {
     platform_log("PATH %s: ", inputImagePath);
         platform_log("Tappoint %s", tappoint);
         platform_log("colorhex %s", colorhex);
@@ -371,11 +372,19 @@ extern "C"
         platform_log("Output Path: %s", outputPath);
         imwrite(outputPath, final_image); // then compare withy img
         platform_log("Image writed again ");
+
+          }
+    catch (const std::exception& e) {
+        cv::Mat img0 = cv::imread(inputImagePath);
+        imwrite(outputPath, img0);
+  }
+
     }
     
 
     __attribute__((visibility("default"))) __attribute__((used)) void water_shed(char *inputImagePath, char *outputPath, char *inputXorImagePath,  char *colorhex)
     {
+          try {
         platform_log("***WATERSHED***");
         cv::Mat img0 = cv::imread(inputImagePath), imgGray, final_image, xor_image, xor_image_copy, temp, temp2, result, result_2, result_grey;
         cv::Mat img_xor = cv::imread(inputXorImagePath);
@@ -663,5 +672,10 @@ extern "C"
             }
 
         imwrite(outputPath, img0);
+          }
+    catch (const std::exception& e) {
+        cv::Mat img0 = cv::imread(inputImagePath);
+        imwrite(outputPath, img0);
+  }
     }
 }
