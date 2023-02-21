@@ -77,11 +77,12 @@ extern "C"
 
         cv::Mat src = cv::Mat(1, 1, CV_8UC3, cv::Scalar(r, g, b));
         cv::Mat desired;
+
         cv::cvtColor(src, desired, cv::COLOR_RGB2HSV);
         int desired_h = desired.at<cv::Vec3b>(0, 0)[0];
-        int desired_s = desired.at<cv::Vec3b>(0, 0)[1];
-        int desired_v = desired.at<cv::Vec3b>(0, 0)[2];
-        platform_log("the desried H S V color : %d,%d,%d", desired_h, desired_s, desired_v);
+        int desired_sat = desired.at<cv::Vec3b>(0, 0)[1];
+        int desired_value = desired.at<cv::Vec3b>(0, 0)[2];
+        platform_log("the desried H S V color : %d,%d,%d", desired_h, desired_sat, desired_value);
 
         cv::Mat img = cv::imread(inputImagePath);
         platform_log("Length row: %i", img.rows);
@@ -112,23 +113,27 @@ extern "C"
         platform_log("tappoint hue, sat : %d,%d", hue, min_sat);
 
         int black ; 
+        cv::Scalar minHSV, maxHSV;
 
         if(value <40) {  //black image
 
         black =1;
 
-        cv::Scalar minHSV = cv::Scalar(0, min_sat - 60, 0); // bed
-        cv::Scalar maxHSV = cv::Scalar(180, 255, 40);         // bed was +30
+        minHSV = cv::Scalar(0, min_sat - 60, 0); // bed
+        maxHSV = cv::Scalar(180, 255, 40);         // bed was +30
 
         }
 
         else if (min_sat <40) {
-        cv::Scalar minHSV = cv::Scalar(0, min_sat - 60, 0); // bed
-        cv::Scalar maxHSV = cv::Scalar(180, 255, 255);         // bed was +30
+        black =0;
+        minHSV = cv::Scalar(0, min_sat - 60, 0); // bed
+        maxHSV = cv::Scalar(180, 255, 255);         // bed was +30
         }
         else {
-        cv::Scalar minHSV = cv::Scalar(low_hue, min_sat - 60, 20); // bed
-        cv::Scalar maxHSV = cv::Scalar(high_hue, 255, 240);         // bed was +30}
+        black =0;
+        minHSV = cv::Scalar(low_hue, min_sat - 60, 20); // bed
+        maxHSV = cv::Scalar(high_hue, 255, 240);         // bed was +30
+        }
 
         cv::Mat maskHSV, resultHSV;
         cv::inRange(hsv, minHSV, maxHSV, maskHSV);
@@ -166,7 +171,7 @@ extern "C"
 
         cvtColor(drawing, drawing, COLOR_BGR2GRAY);
         bitwise_and(img, img, result, drawing);
-        cvtColor(result, result, COLOR_BGR2HSV);
+        //cvtColor(result, result, COLOR_BGR2HSV);
 
         vector<Mat> hsv_vec;
         split(result, hsv_vec); // this is an opencv function
@@ -181,21 +186,182 @@ extern "C"
         Point maxLoc;
         minMaxLoc(s, &minVal, &maxVal, &minLoc, &maxLoc);
 
-        h.setTo(desired_h, v > 1);
-        // s = 62;
-        // s.setTo(142, v > 1);
-        s = s / maxVal;
-        // s = s+0.2;
-        s = s * desired_s;
-        if(black)
-        {v = v + 20;}
+                int counter = 0;
+                int value_mean = 0;
+                int sat_mean = 0;
+                for(int i=0; i<h.rows; i++){
+                    for(int j=0; j<h.cols; j++){
+                        uchar &value = v.at<uchar>(i, j);
+                        uchar &sat = s.at<uchar>(i, j);
+                        if (value > 0){
+                        value_mean += value; 
+                        sat_mean += sat; 
+
+                        counter += 1;
+   
+                        }
+                    }
+                }
+
+
+                value_mean = value_mean / counter;
+                sat_mean = sat_mean / counter;
+
+                //cout << value_mean << endl;
+                //cout << sat_mean << endl;
+                
+                h.setTo(desired_h, v > 0);
+
+                if (desired_value >= 80 && desired_sat >= 80) {
+                    //cout << "normal wanted" << endl;
+
+                if (sat_mean < 80 && value_mean >= 80){
+                    //cout << "white image" << endl;
+                    for(int i=0; i<h.rows; i++){
+                        for(int j=0; j<h.cols; j++){
+                            uchar &value = v.at<uchar>(i, j);
+                            uchar &sat = s.at<uchar>(i, j);
+                            if (value > 0){
+                                sat = max(10, min(sat + desired_sat - sat_mean, (int)255));
+                                value = max(10, min(value + desired_value - value_mean, (int)255));
+
+                                }
+                            }
+                            
+                            }
+                        }
+                    
+                else if (value_mean < 80 && sat_mean >= 80){
+                    //cout << "black image" << endl;
+                    s.setTo(desired_sat, v > 0);
+                    for(int i=0; i<h.rows; i++){
+                        for(int j=0; j<h.cols; j++){
+                            uchar &value = v.at<uchar>(i, j);
+                            if (value > 0){
+                            value = max(10, min(value + desired_value - value_mean, (int)255));
+
+                                }
+                            }
+                            
+                            }
+                        }
+            
+                else if (value_mean < 80 && sat_mean < 80){
+                    //cout << "ultra dark image" << endl;
+                    for(int i=0; i<h.rows; i++){
+                        for(int j=0; j<h.cols; j++){
+                            uchar &value = v.at<uchar>(i, j);
+                            uchar &sat = s.at<uchar>(i, j);
+                            if (value > 0){
+                            value = max(10, min(value + desired_value - value_mean, (int)255));
+                            sat = max(10, min(sat + desired_sat - sat_mean, (int)255));
+                                }
+                            }
+                        }
+                }
+
+                else {
+                    //cout << "normal image" << endl;
+                    s.setTo(desired_sat, v > 0);
+
+                    for(int i=0; i<h.rows; i++){
+                        for(int j=0; j<h.cols; j++){
+                            uchar &value = v.at<uchar>(i, j);
+                            if (value > 0){
+                            value = max(10, min(value + desired_value - value_mean, (int)255));
+                                }
+                            }
+                        }
+                }
+                }
+
+
+            else if (desired_value >= 80 && desired_sat < 80) {
+                //cout << "white wanted" << endl;
+
+                
+                  if (sat_mean < 80 && value_mean >= 80 ){
+                    //cout << "white image" << endl;
+                    for(int i=0; i<h.rows; i++){
+                        for(int j=0; j<h.cols; j++){
+                            uchar &value = v.at<uchar>(i, j);
+                            uchar &sat = s.at<uchar>(i, j);
+                            if (value > 0){
+                                sat = max(10, min(sat + desired_sat - sat_mean, (int)255));
+                                value = max(10 ,min(desired_value, (int)255));
+                                }
+                            }
+                            }
+                        }
+                else{
+                    
+                for(int i=0; i<h.rows; i++){
+                    for(int j=0; j<h.cols; j++){
+                        uchar &value = v.at<uchar>(i, j);
+                        uchar &sat = s.at<uchar>(i, j);
+                        if (value > 0){
+                            //sat = max(1, min((sat * 40)/255 + desired_sat-20, (int)255));
+                            sat = max(10, min(sat + desired_sat - sat_mean, (int)255));
+
+                            value = max(10 ,min(desired_value, (int)255));
+                            }
+                        }
+                    }
+                }
+                }
+
+            else if (desired_value < 80 && desired_sat >= 80) {
+                //cout << "black wanted" << endl;
+                    
+                  if (sat_mean < 80){
+                    //cout << "white image" << endl;
+                    for(int i=0; i<h.rows; i++){
+                        for(int j=0; j<h.cols; j++){
+                            uchar &value = v.at<uchar>(i, j);
+                            uchar &sat = s.at<uchar>(i, j);
+                            if (value > 0){
+                                sat = max(10,min(sat + desired_sat /2, (int)255));
+                            value = max(10, min(value + desired_value - value_mean, (int)255));
+                                }
+                            }
+                            
+                            }
+                        }
+                else{
+                        
+                for(int i=0; i<h.rows; i++){
+                    for(int j=0; j<h.cols; j++){
+                        uchar &value = v.at<uchar>(i, j);
+                        if (value > 0){
+                            value = max(10, min(value + desired_value - value_mean, (int)255));
+                            //cout << desired_value - value_mean;
+                            }
+                        }
+                    }
+                }
+                }
+
+            else if (desired_value < 80 && desired_sat < 80) {
+                //cout << "ultra black wanted" << endl;
+
+                for(int i=0; i<h.rows; i++){
+                    for(int j=0; j<h.cols; j++){
+                        uchar &value = v.at<uchar>(i, j);
+                        uchar &sat = s.at<uchar>(i, j);
+                        if (value > 0){
+                            value = max(10, min(value + desired_value - value_mean, (int)255));
+                            }
+                        }
+                    }
+                }
         merge(hsv_vec, result);
 
         // BACKGROUND
         cvtColor(result, result, COLOR_HSV2BGR);
         cvtColor(result, result2, COLOR_BGR2GRAY);
+        //cvtColor(img, img, cv::COLOR_BGR2HSV);
 
-        threshold(result2, result2, 20, 255, THRESH_BINARY_INV);
+        threshold(result2, result2, 0, 255, THRESH_BINARY_INV);
         bitwise_and(img, img, background, result2);
         cvtColor(background, background, cv::COLOR_HSV2BGR); // or rgb
 
@@ -206,7 +372,7 @@ extern "C"
         imwrite(outputPath, final_image); // then compare withy img
         platform_log("Image writed again ");
     }
-    }
+    
 
     __attribute__((visibility("default"))) __attribute__((used)) void water_shed(char *inputImagePath, char *outputPath, char *inputXorImagePath,  char *colorhex)
     {
@@ -223,8 +389,8 @@ extern "C"
         cv::Mat desired;
         cv::cvtColor(src, desired, cv::COLOR_RGB2HSV);
         int desired_h = desired.at<cv::Vec3b>(0, 0)[0];
-        int desired_s = desired.at<cv::Vec3b>(0, 0)[1];
-        int desired_v = desired.at<cv::Vec3b>(0, 0)[2];
+        int desired_sat = desired.at<cv::Vec3b>(0, 0)[1];
+        int desired_value = desired.at<cv::Vec3b>(0, 0)[2];
 
         platform_log("%d,%d", img0.rows, img0.cols);
         platform_log("%d,%d", img_xor.rows, img_xor.cols);
@@ -265,71 +431,66 @@ extern "C"
         cvtColor(xor_image_copy, xor_image_copy, COLOR_BGR2GRAY);
         findContours(xor_image_copy, contours_rect, RETR_TREE, CHAIN_APPROX_SIMPLE);
 
-        for (auto cnt : contours_rect)
-        {
-            cv::Rect rect = cv::boundingRect(cnt);
+            for (auto cnt : contours_rect) {
+                Mat result, result_2;
+                cv::Rect rect = cv::boundingRect(cnt);
 
-            Mat temp(xor_image_copy.size(), CV_8UC3, (0, 0, 0));
-            Mat temp2(xor_image_copy.size(), CV_8UC3, (0, 0, 0));
-            cv::rectangle(temp, rect, cv::Scalar(255, 255, 255), -1);
+                Mat temp(xor_image_copy.size(), CV_8UC3,(0,0,0));
+                Mat temp2(xor_image_copy.size(), CV_8UC3,(0,0,0));
+                cv::rectangle(temp, rect, cv::Scalar(255, 255, 255), -1);
 
-            cvtColor(temp, temp, COLOR_BGR2GRAY);
-            bitwise_and(xor_image, xor_image, temp2, temp);
-            cv::rectangle(temp2, rect, cv::Scalar(255, 255, 255), 3);
+                cvtColor(temp, temp, COLOR_BGR2GRAY);
+                bitwise_and(xor_image, xor_image, temp2, temp);
+                cv::rectangle(temp2, rect, cv::Scalar(255, 255, 255), 3);
 
-            findContours(temp2, contours, hierarchy, RETR_CCOMP, CHAIN_APPROX_SIMPLE);
-            if (contours.empty())
-                continue;
-            Mat markers(xor_image.size(), CV_32S);
-            markers = Scalar::all(0);
-            int idx = 0;
-            for (; idx >= 0; idx = hierarchy[idx][0], compCount++)
-                drawContours(markers, contours, idx, Scalar::all(compCount + 1), -1, 8, hierarchy, INT_MAX);
-            if (compCount == 0)
-                continue;
-            vector<Vec3b> colorTab;
-            for (i = 0; i < compCount; i++)
-            {
-                int b = i * 20;
-                int g = i * 20;
-                int r = i * 20;
-                colorTab.push_back(Vec3b(b, g, r));
-            }
-            watershed(img0, markers);
-
-            Mat wshed(markers.size(), CV_8UC3);
-            for (i = 0; i < markers.rows; i++)
-                for (j = 0; j < markers.cols; j++)
+                findContours(temp2, contours, hierarchy, RETR_CCOMP, CHAIN_APPROX_SIMPLE);
+                if( contours.empty() )
+                    continue;
+                Mat markers(xor_image.size(), CV_32S);
+                markers = Scalar::all(0);
+                int idx = 0;
+                for( ; idx >= 0; idx = hierarchy[idx][0], compCount++ )
+                    drawContours(markers, contours, idx, Scalar::all(compCount+1), -1, 8, hierarchy, INT_MAX);
+                if( compCount == 0 )
+                    continue;
+                vector<Vec3b> colorTab;
+                for( i = 0; i < compCount; i++ )
                 {
-                    int index = markers.at<int>(i, j);
-                    if (index == -1)
-                        wshed.at<Vec3b>(i, j) = Vec3b(255, 255, 255);
-                    else if (index <= 0 || index > compCount)
-                        wshed.at<Vec3b>(i, j) = Vec3b(0, 0, 0);
-                    else
-                        wshed.at<Vec3b>(i, j) = colorTab[index - 1];
+                    int b = i*20;
+                    int g = i*20;
+                    int r = i*20;
+                    colorTab.push_back(Vec3b(b,g,r));
                 }
+                watershed( img0, markers );
 
-            cvtColor(wshed, wshed, COLOR_BGR2GRAY);
-            threshold(wshed, wshed, (compCount - 2) * 20, 255, THRESH_BINARY_INV);
+                Mat wshed(markers.size(), CV_8UC3);
+                for( i = 0; i < markers.rows; i++ )
+                    for( j = 0; j < markers.cols; j++ )
+                    {
+                        int index = markers.at<int>(i,j);
+                        if( index == -1 )
+                            wshed.at<Vec3b>(i,j) = Vec3b(255,255,255);
+                        else if( index <= 0 || index > compCount )
+                            wshed.at<Vec3b>(i,j) = Vec3b(0,0,0);
+                        else
+                            wshed.at<Vec3b>(i,j) = colorTab[index - 1];
+                    }
 
-            cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
-            dilate(wshed, wshed, element);
-            bitwise_and(img0, img0, result, wshed);
-            cvtColor(result, result, COLOR_BGR2HSV);
+                cvtColor(wshed, wshed, COLOR_BGR2GRAY);
+                threshold(wshed, wshed, (compCount-2)*20, 255, THRESH_BINARY_INV);
 
-            vector<Mat> hsv_vec;
-            split(result, hsv_vec);
+                cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
+                dilate( wshed, wshed, element );
+                bitwise_and(img0, img0, result, wshed);
 
-            cv::Mat &h = hsv_vec[0];
-            cv::Mat &s = hsv_vec[1];
-            cv::Mat &v = hsv_vec[2];
+                cvtColor(result, result, COLOR_BGR2HSV);
+                vector<Mat> hsv_vec;
+                split(result, hsv_vec);
 
-            h.setTo(110, v > 1);
-            // Mat mask1 = (s > 50);
-            // Mat mask2 = (v > 50);
-            // Mat final_mask = mask1 & mask2;
-
+                cv::Mat& h = hsv_vec[0];
+                cv::Mat& s = hsv_vec[1];
+                cv::Mat& v = hsv_vec[2];
+                
                 int counter = 0;
                 int value_mean = 0;
                 int sat_mean = 0;
@@ -342,63 +503,41 @@ extern "C"
                         sat_mean += sat; 
 
                         counter += 1;
-                        /*
-                        
-                            uchar &sat = s.ptr<uchar>(i)[j];
-                            if (value < 80){
-                            sat = 100;
-                            //value = grey_channels[0].ptr<uchar>(i)[j];  
-                            value += 100;
-                            }
-                            else if (sat < 80){
-                            sat += 100;  
-                            }
-                        }
-                        */
+   
                         }
                     }
                 }
 
-
-                int desired_value,desired_sat;
-                desired_value = desired_v;
-                desired_sat = desired_s;
-
                 value_mean = value_mean / counter;
                 sat_mean = sat_mean / counter;
+                
+                h.setTo(desired_h, v > 0);
 
-                //cout << value_mean << endl;
-                //cout << sat_mean << endl;
+                if (desired_value >= 80 && desired_sat >= 80) {
 
-                //if (desired_value > 80 && desired_sat > 80){
-                //    cout << "normal wanted" << endl;
-
-                if (sat_mean < 80 && value_mean > 80){
-                    //cout << "white image" << endl;
+                if (sat_mean < 80 && value_mean >= 80){
                     for(int i=0; i<h.rows; i++){
                         for(int j=0; j<h.cols; j++){
                             uchar &value = v.at<uchar>(i, j);
                             uchar &sat = s.at<uchar>(i, j);
-                            if (value > 1){
-                                sat = sat + desired_sat - sat_mean;
-                                //value = value + 186 - value_mean;
-                            if (sat >255) sat = 255;
+                            if (value > 0){
+                                sat = max(10, min(sat + desired_sat - sat_mean, (int)255));
+                                value = max(10, min(value + desired_value - value_mean, (int)255));
+
                                 }
                             }
                             
                             }
                         }
                     
-                else if (value_mean < 80 && sat_mean > 80){
-                    //cout << "black image" << endl;
+                else if (value_mean < 80 && sat_mean >= 80){
+                    s.setTo(desired_sat, v > 0);
                     for(int i=0; i<h.rows; i++){
                         for(int j=0; j<h.cols; j++){
                             uchar &value = v.at<uchar>(i, j);
-                            uchar &sat = s.at<uchar>(i, j);
-                            if (value > 1){
-                            value = value + desired_value - value_mean;
-                            //sat = sat + 186 - sat_mean;
-                            if (value >255) value = 255;
+                            if (value > 0){
+                            value = max(10, min(value + desired_value - value_mean, (int)255));
+
                                 }
                             }
                             
@@ -406,40 +545,123 @@ extern "C"
                         }
             
                 else if (value_mean < 80 && sat_mean < 80){
-                    //cout << "ultra dark image" << endl;
                     for(int i=0; i<h.rows; i++){
                         for(int j=0; j<h.cols; j++){
                             uchar &value = v.at<uchar>(i, j);
                             uchar &sat = s.at<uchar>(i, j);
-                            if (value > 1){
-                            value = value + desired_value - value_mean;
-                            sat = sat + desired_sat - sat_mean;
-                            if (value >255) value = 255;
-                            if (sat >255) sat = 255;
+                            if (value > 0){
+                            value = max(10, min(value + desired_value - value_mean, (int)255));
+                            sat = max(10, min(sat + desired_sat - sat_mean, (int)255));
                                 }
                             }
                         }
                 }
 
                 else {
-                    //cout << "normal image" << endl;
-                    //s.setTo(desired_sat, v>1);
+                    s.setTo(desired_sat, v > 0);
 
+                    for(int i=0; i<h.rows; i++){
+                        for(int j=0; j<h.cols; j++){
+                            uchar &value = v.at<uchar>(i, j);
+                            if (value > 0){
+                            value = max(10, min(value + desired_value - value_mean, (int)255));
+                                }
+                            }
+                        }
+                }
                 }
 
-            s.setTo(130, v > 1);
 
+            else if (desired_value >= 80 && desired_sat < 80) {
+                
+                  if (sat_mean < 80 && value_mean >= 80 ){
+                    for(int i=0; i<h.rows; i++){
+                        for(int j=0; j<h.cols; j++){
+                            uchar &value = v.at<uchar>(i, j);
+                            uchar &sat = s.at<uchar>(i, j);
+                            if (value > 0){
+                                sat = max(10, min(sat + desired_sat - sat_mean, (int)255));
+                                value = max(10 ,min(desired_value, (int)255));
+                                }
+                            }
+                            }
+                        }
+                else{
+                    
+                for(int i=0; i<h.rows; i++){
+                    for(int j=0; j<h.cols; j++){
+                        uchar &value = v.at<uchar>(i, j);
+                        uchar &sat = s.at<uchar>(i, j);
+                        if (value > 0){
+                            //sat = max(1, min((sat * 40)/255 + desired_sat-20, (int)255));
+                            sat = max(10, min(sat + desired_sat - sat_mean, (int)255));
+
+                            value = max(10 ,min(desired_value, (int)255));
+                            }
+                        }
+                    }
+                }
+                }
+
+            else if (desired_value < 80 && desired_sat >= 80) {
+                    
+                  if (sat_mean < 80){
+                    for(int i=0; i<h.rows; i++){
+                        for(int j=0; j<h.cols; j++){
+                            uchar &value = v.at<uchar>(i, j);
+                            uchar &sat = s.at<uchar>(i, j);
+                            if (value > 0){
+                                sat = max(10,min(sat + desired_sat /2, (int)255));
+                            value = max(10, min(value + desired_value - value_mean, (int)255));
+                                }
+                            }
+                            
+                            }
+                        }
+                else{
+                        
+                for(int i=0; i<h.rows; i++){
+                    for(int j=0; j<h.cols; j++){
+                        uchar &value = v.at<uchar>(i, j);
+                        if (value > 0){
+                            value = max(10, min(value + desired_value - value_mean, (int)255));
+                            //cout << desired_value - value_mean;
+                            }
+                        }
+                    }
+                }
+                }
+
+            else if (desired_value < 80 && desired_sat < 80) {
+
+                for(int i=0; i<h.rows; i++){
+                    for(int j=0; j<h.cols; j++){
+                        uchar &value = v.at<uchar>(i, j);
+                        uchar &sat = s.at<uchar>(i, j);
+                        if (value > 0){
+                            value = max(10, min(value + desired_value - value_mean, (int)255));
+                            }
+                        }
+                    }
+                }
+            
+            
             merge(hsv_vec, result);
             cvtColor(result, result, COLOR_HSV2BGR);
-        }
-        cvtColor(result, result_grey, COLOR_BGR2GRAY);
+            
+            cvtColor(result, result_grey, COLOR_BGR2GRAY);
 
-        threshold(result_grey, result_grey, 0, 255, THRESH_BINARY_INV);
+            threshold(result_grey, result_grey, 0, 255, THRESH_BINARY_INV);
 
-        bitwise_and(img0, img0, result_2, result_grey);
+            bitwise_and(img0, img0, result_2, result_grey);
 
-        final_image = result + result_2;
+            final_image = result + result_2;
 
-        imwrite(outputPath, final_image);
+            img0 = final_image;
+
+            //imshow( "result2", final_image);
+            }
+
+        imwrite(outputPath, img0);
     }
 }
